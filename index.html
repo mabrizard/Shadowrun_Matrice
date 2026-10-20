@@ -52,6 +52,10 @@ header{padding:10px 16px;border-bottom:1px solid var(--line);background:linear-g
 #fsort{background:transparent;border:1px solid var(--line);color:var(--cyan);padding:9px 12px;font-size:12px;letter-spacing:1px;font-family:inherit;cursor:pointer}
 #fsort:hover{border-color:var(--cyan)}
 #fcount{color:var(--dim);font-size:11px;letter-spacing:1px}
+#fcats{max-width:900px}
+#fcats .chip{padding:7px 10px;cursor:pointer;letter-spacing:.5px}
+#fcats .chip.on{background:var(--cyan);color:#000;border-color:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
+#fcats .chip.empty0{opacity:.35}
 #threads mark{background:var(--amber);color:#000;padding:0 2px}
 @media (max-width:760px){#fsearch{font-size:16px}}
 .tab,button{font-family:inherit;cursor:pointer}
@@ -186,6 +190,7 @@ main{flex:1;min-height:0;position:relative}
         <button id="fsort" type="button">TRI : PLUS RÉCENTS ▾</button>
         <span id="fcount"></span>
       </div>
+      <div class="chips" id="fcats" style="margin-bottom:14px"></div>
       <div id="threads"></div>
     </section>
   </main>
@@ -440,7 +445,16 @@ const THREADS = [
       ["Rurik_D","Je te le prends à 350 ¥ si tu me le déposes dans une boîte morte sécurisée à Downtown. Ne touche à rien d'autre dessus."]]}
 ];
 function avatar(h){const a=HANDLES[h]||[h.slice(0,2).toUpperCase(),"#9aa7b5"];return `<div class="av" style="color:${a[1]}">${esc(a[0])}</div>`}
-const fstate={sort:"new",q:""};
+const fstate={sort:"new",q:"",cat:""};
+/* Chaque fil a son propre tag : on les regroupe en 5 catégories pour filtrer */
+const CATS=[
+ ["ACTU & POLITIQUE",["NEWS SEATTLE","SÉCURITÉ & TENSION"]],
+ ["MATRICE & TECH",["MATRICE & TECH","MATÉRIEL & CYBER"]],
+ ["MARCHÉS",["ÉCONOMIE NOIRE","PETITES ANNONCES"]],
+ ["RUE & RUMEURS",["RUE & DROGUES","URBAN LORE","RUMORS & JOBS"]],
+ ["OCCULTE",["ARCHÉOLOGIE & OCCULTE"]]
+];
+const catOf=t=>(CATS.find(c=>c[1].includes(t.tag))||["AUTRES"])[0];
 const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
 function tsKey(ts){const m=ts.match(/(\d+) (\w+) (\d+) - (\d+):(\d+):(\d+)/);return m?Date.UTC(+m[3],MON[m[2]]||0,+m[1],+m[4],+m[5],+m[6]):0}
 function nz(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase()}  /* insensible aux accents et à la casse */
@@ -453,9 +467,14 @@ function hl(s,q){  /* texte échappé, avec les mots recherchés surlignés */
 function threadMatches(t,q){const k=nz((q||"").trim());return !k||nz([t.tag,t.title,t.who,t.text,...t.re.flat()].join(" ")).includes(k)}
 function renderFeed(){
   const q=fstate.q;
-  const list=THREADS.filter(t=>threadMatches(t,q)).sort((a,b)=>fstate.sort==="new"?tsKey(b.ts)-tsKey(a.ts):tsKey(a.ts)-tsKey(b.ts));
+  const base=THREADS.filter(t=>threadMatches(t,q));
+  const list=base.filter(t=>!fstate.cat||catOf(t)===fstate.cat).sort((a,b)=>fstate.sort==="new"?tsKey(b.ts)-tsKey(a.ts):tsKey(a.ts)-tsKey(b.ts));
   document.getElementById("fsort").textContent="TRI : "+(fstate.sort==="new"?"PLUS RÉCENTS ▾":"PLUS ANCIENS ▴");
   document.getElementById("fcount").textContent=list.length+" / "+THREADS.length+" FILS";
+  document.getElementById("fcats").innerHTML=
+    `<button type="button" class="chip${fstate.cat?"":" on"}" data-cat="">TOUS (${base.length})</button>`+
+    CATS.map(c=>{const n=base.filter(t=>catOf(t)===c[0]).length;
+      return `<button type="button" class="chip${fstate.cat===c[0]?" on":""}${n?"":" empty0"}" data-cat="${esc(c[0])}">${esc(c[0])} (${n})</button>`}).join("");
   document.getElementById("threads").innerHTML=list.length?list.map(t=>{
     const col=(HANDLES[t.who]||[0,"#9aa7b5"])[1];
     let h=`<div class="thread"><div class="tt"><b>[${hl(t.tag,q)}]</b>${hl(t.title,q)}</div>`+
@@ -468,6 +487,10 @@ function renderFeed(){
 }
 document.getElementById("fsearch").addEventListener("input",e=>{fstate.q=e.target.value;renderFeed()});
 document.getElementById("fsort").onclick=()=>{fstate.sort=fstate.sort==="new"?"old":"new";renderFeed()};
+document.getElementById("fcats").addEventListener("click",e=>{
+  const b=e.target.closest("[data-cat]");if(!b)return;
+  fstate.cat=b.dataset.cat===fstate.cat?"":b.dataset.cat;renderFeed();
+});
 
 const state = {unlocked:{0:true}, trace:0, cwd:"/", selected:null, pending:null, locked:false};
 try{const s=JSON.parse(localStorage.getItem("bor9")||"null"); if(s){state.unlocked=Object.assign({0:true},s.unlocked);}}catch(e){}
