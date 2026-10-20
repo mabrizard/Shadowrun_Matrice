@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JackPoint v5.78 — BOREALIS-9</title>
+<style>
+:root{
+  --bg:#0a0d12; --panel:#0e131b; --line:#16314a;
+  --green:#00ff66; --cyan:#00e5ff; --amber:#ff9900; --red:#ff2d4a;
+  --text:#bfeede; --dim:#5f8a80;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:"Consolas","Courier New",monospace;overflow:hidden;
+  background-image:linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.05) 1px,transparent 1px);
+  background-size:36px 36px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.22) 3px);
+  animation:flick 6s infinite}
+@keyframes flick{0%,96%,100%{opacity:1}97%{opacity:.7}98%{opacity:1}99%{opacity:.8}}
+#app{display:flex;flex-direction:column;height:100%}
+header{padding:10px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0d1620,#0a0d12);display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:44px;height:44px;border:1px solid var(--cyan);object-fit:cover;background:#000}
+.brand h1{font-size:16px;color:var(--green);letter-spacing:2px;text-shadow:0 0 8px var(--green)}
+.brand small{display:block;color:var(--cyan);font-size:11px;letter-spacing:1px}
+.gauges{display:flex;gap:16px;flex-wrap:wrap}
+.gauge{min-width:150px}
+.gauge label{font-size:10px;color:var(--dim);letter-spacing:1px;display:flex;justify-content:space-between}
+.bar{height:8px;border:1px solid var(--line);background:#000;margin-top:3px;position:relative}
+.bar i{display:block;height:100%;width:0;background:var(--green);box-shadow:0 0 8px currentColor;transition:width .4s,background .4s}
+.tabs{display:flex;gap:6px}
+.tab,button{font-family:inherit;cursor:pointer}
+.tab{background:transparent;border:1px solid var(--line);color:var(--dim);padding:7px 14px;font-size:12px;letter-spacing:1px}
+.tab.active{color:var(--bg);background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:flex}
+
+/* AR */
+#ar{padding:12px;gap:12px}
+#side{width:340px;max-width:42%;display:flex;flex-direction:column;gap:10px;min-height:0}
+#search{width:100%;background:#000;border:1px solid var(--cyan);color:var(--green);padding:9px 10px;font-family:inherit;font-size:13px;outline:none}
+#search:focus{box-shadow:0 0 10px var(--cyan)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid var(--line);color:var(--cyan);background:transparent;font-size:11px;padding:3px 8px}
+.chip:hover{border-color:var(--cyan)}
+#list{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.card{border:1px solid var(--line);background:var(--panel);padding:10px;cursor:pointer;position:relative;transition:.15s}
+.card:hover{border-color:var(--green);box-shadow:0 0 12px rgba(0,255,102,.35);animation:glitch .35s steps(2) 1}
+@keyframes glitch{0%{transform:translate(0)}25%{transform:translate(-2px,1px);text-shadow:2px 0 var(--red),-2px 0 var(--cyan)}50%{transform:translate(2px,-1px)}100%{transform:translate(0)}}
+.card.sel{border-color:var(--cyan)}
+.card h3{font-size:13px;color:var(--green);margin-bottom:4px}
+.card p{font-size:11px;color:var(--dim)}
+.card .path{color:var(--cyan);font-size:10px}
+.lvl{position:absolute;top:8px;right:8px;font-size:10px;padding:1px 6px;border:1px solid}
+.lvl.l0{color:var(--green)} .lvl.l1{color:var(--cyan)} .lvl.l2{color:var(--amber)} .lvl.l3{color:var(--red)}
+#viewer{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel);overflow:auto;padding:22px 26px}
+#viewer h2{color:var(--cyan);font-size:20px;letter-spacing:1px;margin-bottom:4px;text-shadow:0 0 8px rgba(0,229,255,.6)}
+#viewer h3{color:var(--amber);margin:18px 0 6px;font-size:14px;letter-spacing:1px}
+#viewer p{line-height:1.6;margin:8px 0;font-size:14px}
+#viewer ul{margin:8px 0 8px 22px;line-height:1.6;font-size:14px}
+#viewer .meta{font-size:11px;color:var(--dim);border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:12px}
+#viewer .stamp{display:inline-block;border:2px solid var(--red);color:var(--red);padding:2px 10px;transform:rotate(-3deg);margin:6px 0;letter-spacing:2px;font-weight:bold}
+#viewer img.illus{float:right;width:200px;max-width:40%;margin:0 0 12px 16px;border:1px solid var(--cyan);background:#000;box-shadow:0 0 14px rgba(0,229,255,.3)}
+.empty{color:var(--dim);text-align:center;margin-top:20vh;font-size:14px}
+
+/* Terminal */
+#cli{flex-direction:column;background:#000;padding:10px 14px}
+#out{flex:1;overflow:auto;white-space:pre-wrap;word-break:break-word;color:var(--green);font-size:13px;line-height:1.45}
+#out .err{color:var(--red)} #out .warn{color:var(--amber)} #out .info{color:var(--cyan)}
+#cmdline{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:8px;color:var(--green)}
+#cmd{flex:1;background:transparent;border:0;outline:0;color:var(--green);font-family:inherit;font-size:14px}
+
+/* Modal */
+#modal,#lockdown{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8)}
+#modal.show,#lockdown.show{display:flex}
+.box{width:min(380px,92vw);background:var(--panel);border:1px solid var(--red);padding:22px;text-align:center;box-shadow:0 0 30px rgba(255,45,74,.4)}
+.box.ok{border-color:var(--green);box-shadow:0 0 40px rgba(0,255,102,.6)}
+.box h2{color:var(--red);font-size:16px;letter-spacing:2px;margin-bottom:6px}
+.box p{color:var(--dim);font-size:12px;margin-bottom:12px}
+.box input{width:100%;background:#000;border:1px solid var(--cyan);color:var(--green);padding:10px;text-align:center;font-family:inherit;font-size:16px;letter-spacing:2px;text-transform:uppercase;outline:none}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.pad button{background:#000;border:1px solid var(--line);color:var(--cyan);padding:9px 0;font-size:13px}
+.pad button:hover{border-color:var(--cyan)}
+.row{display:flex;gap:8px}
+.row button{flex:1;padding:10px;border:1px solid var(--green);background:transparent;color:var(--green);font-size:13px;letter-spacing:1px}
+.row button.cancel{border-color:var(--dim);color:var(--dim)}
+#msg{min-height:20px;margin-top:10px;font-size:13px;letter-spacing:1px}
+.flashG{animation:fg .7s}
+.flashR{animation:fr .8s}
+@keyframes fg{0%{background:rgba(0,255,102,.6)}100%{background:transparent}}
+@keyframes fr{0%,40%{background:rgba(255,45,74,.55)}20%,60%{background:transparent}100%{background:transparent}}
+#lockdown{background:rgba(60,0,8,.95);flex-direction:column;color:var(--red);text-align:center;animation:blink 1s infinite}
+@keyframes blink{50%{background:rgba(20,0,2,.97)}}
+#lockdown h1{font-size:34px;letter-spacing:6px;margin-bottom:10px}
+#lockdown button{margin-top:18px;background:transparent;border:1px solid var(--dim);color:var(--dim);padding:6px 12px;font-size:11px}
+.sndbtn{background:transparent;border:1px solid var(--line);color:var(--dim);padding:7px 10px;font-size:12px;font-family:inherit;cursor:pointer}
+.backbtn{display:none;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;margin-bottom:12px;font-size:12px;letter-spacing:1px;font-family:inherit;cursor:pointer}
+#start{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+#start h1{color:var(--green);letter-spacing:4px;text-shadow:0 0 10px var(--green);font-size:22px}
+#start p{color:var(--cyan);font-size:12px;letter-spacing:1px}
+#start button{margin-top:10px;background:transparent;border:1px solid var(--green);color:var(--green);padding:14px 22px;font-size:14px;letter-spacing:2px;font-family:inherit;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 18px var(--green)}}
+@media (max-width:760px){
+  header{padding:8px 10px;gap:8px}
+  .brand small{display:none}.brand h1{font-size:13px}.brand img{width:34px;height:34px}
+  .gauges{gap:10px;width:100%}.gauge{min-width:0;flex:1}
+  .tab,.sndbtn{padding:6px 9px;font-size:11px}
+  #ar{flex-direction:column;padding:8px}
+  #side{width:100%;max-width:100%;flex:1}
+  #list{flex:1}
+  #viewer{padding:14px;flex:1}
+  #viewer img.illus{float:none;display:block;width:100%;max-width:100%;max-height:75vh;object-fit:contain;margin:0 0 12px}
+  #ar.reading #side{display:none}
+  #ar:not(.reading) #viewer{display:none}
+  .backbtn{display:inline-block}
+  #search,#cmd,#codeIn{font-size:16px}
+  #cli{padding:8px 10px}
+  #out{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <img id="logoImg" alt="logo">
+      <div><h1>JACKPOINT v5.78</h1><small>AZTECHNOLOGY HOST ID : BOREALIS-9 · NŒUD SÉCURISÉ</small></div>
+    </div>
+    <div class="gauges">
+      <div class="gauge"><label><span>FIREWALL / TRACE</span><span id="traceV">0%</span></label><div class="bar"><i id="traceBar"></i></div></div>
+      <div class="gauge"><label><span>BRUTEFORCE (NIVEAUX)</span><span id="bfV">0/3</span></label><div class="bar"><i id="bfBar" style="background:var(--cyan)"></i></div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-mode="ar">◈ MODE AR</button>
+      <button class="tab" data-mode="cli">▮ TERMINAL</button>
+      <button class="sndbtn" id="snd" title="Son">♪ ON</button>
+    </div>
+  </header>
+  <main>
+    <section id="ar" class="view active">
+      <aside id="side">
+        <input id="search" placeholder="⌕ Recherche : Marshall, Orichalque, Givre, Janus, Ruche…" autocomplete="off">
+        <div class="chips" id="chips"></div>
+        <div id="list"></div>
+      </aside>
+      <article id="viewer"><div class="empty">// AUCUN FICHIER SÉLECTIONNÉ //<br><br>Sélectionnez un fichier dans l'arborescence.</div></article>
+    </section>
+    <section id="cli" class="view">
+      <div id="out"></div>
+      <div id="cmdline"><span id="prompt">decker@borealis:/$</span><input id="cmd" autocomplete="off" spellcheck="false" autofocus></div>
+    </section>
+  </main>
+</div>
+
+<div id="modal"><div class="box" id="mbox">
+  <h2>ACCÈS REFUSÉ — SIGHASH OBLIGATOIRE</h2>
+  <p id="mtarget">Fichier verrouillé.</p>
+  <input id="codeIn" placeholder="CODE D'ACCÈS" autocomplete="off" spellcheck="false">
+  <div class="pad" id="pad"></div>
+  <div class="row"><button id="mok">VALIDER</button><button class="cancel" id="mcancel">ANNULER</button></div>
+  <div id="msg"></div>
+</div></div>
+
+<div id="lockdown"><h1>⚠ LOCKDOWN ⚠</h1><p id="lockT">TRACE COMPLÈTE — IC NOIRE DÉPLOYÉE</p><button id="gmReset">[MJ] Réinitialiser</button></div>
+
+<div id="start">
+  <h1>JACKPOINT v5.78</h1>
+  <p>AZTECHNOLOGY HOST ID : BOREALIS-9</p>
+  <p>NŒUD SÉCURISÉ — ACCÈS RESTREINT</p>
+  <button id="startBtn">[ ÉTABLIR LA LIAISON ]</button>
+  <p style="color:var(--dim);font-size:11px">Activez le son pour une immersion complète</p>
+</div>
+
+<script>
+/* ============ CONFIGURATION — remplacez ces URLs par vos images (DALL-E, etc.) ============ */
+/* Placez les images dans le même dossier que index.html (ou mettez une URL complète).
+   Si un fichier est introuvable, un placeholder s'affiche automatiquement. */
+const IMAGES = {
+  logo: "",                      // Logo Aztechnology / Projet Borealis (en-tête)
+  site: "",                      // Visuel du chantier Borealis
+  marshall: "marshall_badge.jpg",// Badge / carte d'accès du Dr Marshall
+  ruche: "dossier_ruche.jpg",    // La Ruche — dossier JANUS
+  aurora: "aurora_logo.jpg",     // Logo Aurora Crest — traceur financier
+  givre: "mr_givre.jpg",         // Portrait de Mr Givre — traceur financier
+  labo: "laboratoire_marshall.jpg" // Laboratoire souterrain — dossier Marshall
+};
+/* ========================================================================================= */
+
+const CODES = {1:"MARSHALL-2078", 2:"JANUS-7000", 3:"GHOST-DENVER"};
+const LEVEL_NAMES = {0:"PUBLIC",1:"NIVEAU 1",2:"NIVEAU 2",3:"FICHIER OMBRE"};
+
+const FILES = [
+ {id:"geo", dir:"/root/PROJECT_BOREALIS", name:"geologie_rainier.txt", level:0,
+  title:"Rapport géologique — Mont Rainier", kw:["rainier","geologie","forage","basalte","aztechnology"],
+  summary:"Aztechnology Mining Dept. — relevés de forage, strates et anomalies.",
+  img:"site",
+  text:`## Aztechnology Mining Dept. — Rapport officiel GEO-RAI-0412
+Classification : PUBLIC / SÉCURITÉ BASSE · Site : Mont Rainier, secteur nord-est (Chantier BOREALIS)
+
+## Résumé exécutif
+Le programme de forage exploratoire BOREALIS a atteint la cote -2 140 m. La structure basaltique du Mont Rainier présente une stratification inhabituellement régulière, incompatible avec un refroidissement magmatique naturel.
+
+## Relevés principaux
+- Cote atteinte : -2 140 m, progression moyenne 11 m/jour
+- Température de paroi : 61 °C (+9 °C par rapport aux modèles)
+- Conductivité sismique : anomalies périodiques à intervalles de 43 secondes
+- Présence de cavités vitrifiées, d'origine indéterminée
+
+## Remarques
+Le département recommande la poursuite des opérations. Les écarts de mesure sont attribués à des « effets de résonance locaux ». Aucune incidence environnementale notable n'est à signaler.`},
+ {id:"news", dir:"/root/PROJECT_BOREALIS", name:"actus_seattle_2078.txt", level:0,
+  title:"Fil d'actualité — Seattle 2078", kw:["seattle","dunkelzahn","nan","corpo","actualites","news"],
+  summary:"Flux d'infos : Dunkelzahn, tensions NAN, mouvements des corpos.",
+  text:`## Flux d'actualité — Seattle / Redmond / Puyallup
+Agrégé par le nœud public BOREALIS-9.
+
+- 07:12 — Les héritages de Dunkelzahn continuent d'alimenter les commissions d'enquête ; plusieurs corpos réclament un nouveau gel des actifs.
+- 08:40 — Tensions aux frontières des NAN : un convoi de ravitaillement retardé près de Tacoma.
+- 09:05 — Éruption mineure signalée dans la région du Cascade ; l'AGS minimise l'événement.
+- 10:30 — Aztechnology annonce une « initiative énergétique responsable » dans la zone du Rainier.
+- 11:18 — Saeder-Krupp et Renraku se positionnent sur le marché des courtiers matriciels.
+- 12:02 — Les rumeurs de mouvements shadowrun sur les docks de Seattle augmentent la pression policière.
+
+## Note
+Flux public, non vérifié. Toute corrélation avec des opérations internes est fortuite.`},
+ {id:"meteo", dir:"/root/PROJECT_BOREALIS", name:"meteo_securite_chantier.txt", level:0,
+  title:"Relevés météo & flux de sécurité", kw:["meteo","securite","chantier","borealis","givre","camera"],
+  summary:"Conditions météo et statut des flux caméras du chantier.",
+  text:`## Relevés météo — Chantier BOREALIS
+- Température extérieure : -6 °C, vent 38 km/h
+- Visibilité : 400 m, risque de givre sur les installations d'altitude
+- Plafond nuageux bas, précipitations neige-pluie probables
+
+## Flux de sécurité
+- CAM-01 Portail principal : ACTIF
+- CAM-04 Puits de forage : ACTIF (latence élevée)
+- CAM-07 Baraquements : HORS LIGNE (maintenance)
+- CAM-09 Galerie sud : ACTIF — interférences récurrentes à 03:00
+
+## Consigne
+Les équipes de nuit ne doivent pas rester seules sur le niveau -3. Rapporter toute perception sonore anormale au superviseur.`},
+ {id:"marshall", dir:"/logs/medical", name:"marshall_notes.txt", level:1,
+  title:"Dossier médical — Dr Nuri Marshall", kw:["marshall","nuri","medical","migraine","demence","givre","murmures"],
+  summary:"Notes cliniques sur les équipes de forage.",
+  img:["marshall","labo"],
+  text:`## Dr Nuri Marshall — Notes cliniques confidentielles
+Service médical Aztechnology · Chantier BOREALIS
+
+## Constat
+Depuis la cote -1 800 m, les équipes de forage présentent des migraines chroniques, résistantes aux analgésiques standards. Les troubles apparaissent surtout la nuit, par vagues.
+
+## Symptômes rapportés
+- Hallucinations auditives : « des murmures dans le basalte »
+- Insomnies sévères, cauchemars partagés par plusieurs travailleurs
+- Trois cas de démence soudaine en moins de dix jours
+- Réaction anormale aux implants datajack : parasites dans la perception AR
+
+## Observations
+Aucun agent pathogène ou toxique détecté. Les analyses astrales internes ont été refusées par la direction. Le Dr Marshall estime que l'origine du mal est « dans la roche ».
+
+## Note personnelle
+« Je demande l'arrêt des forages. Ma requête a été classée sans suite. »`},
+ {id:"janus", dir:"/classified/JANUS", name:"projet_janus.txt", level:2,
+  title:"PROJET JANUS — Ultra-confidentiel", kw:["janus","orichalque","magie du sang","ruche","drain","quatrieme monde","matrice de sorts"],
+  summary:"Le véritable but du forage BOREALIS.",
+  img:"ruche",
+  text:`## PROJET JANUS — ULTRA-CONFIDENTIEL AZTECHNOLOGY
+Accès restreint : Conseil d'administration & Direction BOREALIS
+
+## Objectif réel
+Le forage ne vise aucune ressource minière. Il a pour but d'atteindre et d'étudier des structures d'Orichalque datant du Quatrième Monde, enfouies sous le Mont Rainier.
+
+## Programme
+- Analyse des matrices d'Orichalque et de leur résonance avec la Magie du Sang
+- Fabrication de Matrices de Sorts capables de neutraliser le Drain magique
+- Test de réplication sur sujets volontaires (dossier « Ruche » — accès Direction)
+
+## Incidents
+La structure semble répondre à la présence humaine. Les murmures rapportés par le personnel coïncident avec les pics d'activité de la matrice. Le phénomène « Ruche » est considéré comme un effet secondaire acceptable.
+
+## Directive
+Toute fuite sera traitée au niveau Corporate. Poursuivre le forage jusqu'à contact.`},
+ {id:"ghost", dir:"/classified/GHOST", name:"transaction_tracer.txt", level:3,
+  title:"Traceur de transaction financière", kw:["ghost","denver","ghostwalker","salish-shidhe","banque","contrat","paiement"],
+  summary:"Origine du paiement du contrat de Shadowrun initial.",
+  img:["aurora","givre"],
+  text:`## TRACEUR DE TRANSACTION — FICHIER OMBRE
+Statut : FUITE / HORS PÉRIMÈTRE AZTECHNOLOGY
+
+## Résultat de la trace
+Le paiement du contrat initial transite par une banque écran enregistrée à Seattle, mais ses fonds proviennent d'un établissement du Salish-Shidhe, lui-même relié à Denver.
+
+## Chaîne de transfert
+- Compte source : holding « Aurora Crest » (Denver)
+- Relais : banque écran salish-shidhe, trois rebonds
+- Destinataire : compte tampon du Johnson (alias « Mr Givre »)
+
+## Conclusion
+Le commanditaire final est lié au Territoire du Grand Dragon Ghostwalker. L'équipe a été payée pour s'attaquer à BOREALIS par un tiers qui n'est pas Aztechnology.`}
+];
+
+const state = {unlocked:{0:true}, trace:0, cwd:"/", selected:null, pending:null, locked:false};
+try{const s=JSON.parse(localStorage.getItem("bor9")||"null"); if(s){state.unlocked=Object.assign({0:true},s.unlocked);}}catch(e){}
+function save(){try{localStorage.setItem("bor9",JSON.stringify({unlocked:state.unlocked}))}catch(e){}}
+
+/* ---------- Images ---------- */
+function placeholder(label){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="#050a10"/><g stroke="#00e5ff" stroke-opacity=".25">${Array.from({length:12},(_,i)=>`<path d="M${i*36} 0V300M0 ${i*27}H400"/>`).join("")}</g><rect x="8" y="8" width="384" height="284" fill="none" stroke="#00ff66"/><text x="200" y="150" fill="#00ff66" font-family="monospace" font-size="16" text-anchor="middle">[ IMAGE : ${label} ]</text><text x="200" y="175" fill="#00e5ff" font-family="monospace" font-size="11" text-anchor="middle">Renseignez IMAGES.${label} dans le script</text></svg>`;
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+function imgSrc(key){return IMAGES[key]||placeholder(key)}
+const logoEl=document.getElementById("logoImg");
+logoEl.onerror=()=>{logoEl.onerror=null;logoEl.src=placeholder("logo")};
+logoEl.src=imgSrc("logo");
+
+/* ---------- Audio ---------- */
+let actx=null,master=null,muted=false,humStarted=false;
+function ensureAudio(){
+  if(!actx){
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    master=actx.createGain();master.gain.value=muted?0:1;master.connect(actx.destination);
+  }
+  if(actx.state==="suspended")actx.resume();
+}
+function beep(freq,dur,type="square",vol=.05,delay=0){
+  try{
+    ensureAudio();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(master);
+    const t=actx.currentTime+delay;o.start(t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.stop(t+dur);
+  }catch(e){}
+}
+/* Ambiance : bourdonnement de serveur, bips de données, tic de trace qui s'accélère */
+function startAudio(){
+  try{
+    ensureAudio();if(humStarted)return;humStarted=true;
+    const lp=actx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=220;
+    const hg=actx.createGain();hg.gain.value=.05;
+    [48,96.5].forEach((f,i)=>{const o=actx.createOscillator();o.type=i?"sine":"sawtooth";o.frequency.value=f;o.connect(lp);o.start()});
+    lp.connect(hg);hg.connect(master);
+    (function chirp(){if(!muted&&!state.locked)beep(1400+Math.random()*1600,.05,"sine",.012);setTimeout(chirp,1200+Math.random()*3000)})();
+    (function tick(){if(state.trace>0&&!state.locked&&!muted)beep(1000+state.trace*6,.06,"square",.025);setTimeout(tick,Math.max(160,1300-state.trace*11))})();
+  }catch(e){}
+}
+function setMuted(m){muted=m;if(master)master.gain.value=m?0:1;if(m&&window.speechSynthesis)speechSynthesis.cancel()}
+function speak(t){
+  if(muted||!window.speechSynthesis)return;
+  try{const u=new SpeechSynthesisUtterance(t);u.lang="fr-FR";u.rate=.9;u.pitch=.5;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}
+}
+function sfxSiren(){
+  try{
+    ensureAudio();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type="sawtooth";g.gain.value=.07;o.connect(g);g.connect(master);
+    const t=actx.currentTime;o.frequency.setValueAtTime(500,t);
+    for(let i=0;i<6;i++){o.frequency.linearRampToValueAtTime(900,t+i+.5);o.frequency.linearRampToValueAtTime(500,t+i+1)}
+    g.gain.setValueAtTime(.07,t+5.5);g.gain.linearRampToValueAtTime(0,t+6);
+    o.start(t);o.stop(t+6);
+  }catch(e){}
+}
+const sfxOk=()=>{beep(520,.12,"sine",.08);beep(780,.12,"sine",.08,.12);beep(1040,.25,"sine",.08,.24)};
+const sfxKo=()=>{beep(180,.25,"sawtooth",.08);beep(140,.25,"sawtooth",.08,.28);beep(180,.25,"sawtooth",.08,.56)};
+const sfxClick=()=>beep(900,.04,"square",.03);
+
+/* ---------- Gauges ---------- */
+function updateGauges(){
+  const t=state.trace;
+  document.getElementById("traceV").textContent=t+"%";
+  const tb=document.getElementById("traceBar");
+  tb.style.width=t+"%";
+  tb.style.background=t<40?"var(--green)":t<75?"var(--amber)":"var(--red)";
+  const n=[1,2,3].filter(l=>state.unlocked[l]).length;
+  document.getElementById("bfV").textContent=n+"/3";
+  document.getElementById("bfBar").style.width=(n/3*100)+"%";
+}
+function flash(cls){document.body.classList.remove("flashG","flashR");void document.body.offsetWidth;document.body.classList.add(cls);}
+
+/* ---------- Unlock logic ---------- */
+function tryCode(raw){
+  const c=(raw||"").trim().toUpperCase();
+  const lvl=Object.keys(CODES).find(k=>CODES[k]===c);
+  if(lvl){
+    state.unlocked[lvl]=true;save();updateGauges();sfxOk();flash("flashG");
+    return {ok:true,level:+lvl};
+  }
+  state.trace=Math.min(100,state.trace+25);updateGauges();sfxKo();flash("flashR");
+  if(state.trace>=100)lockdown();
+  else if(state.trace===50)speak("Tentative d'intrusion détectée.");
+  else if(state.trace===75)speak("Trace en cours. Contre-mesures activées.");
+  return {ok:false};
+}
+function lockdown(){
+  state.locked=true;
+  document.getElementById("lockdown").classList.add("show");
+  closeModal();
+  sfxSiren();speak("Intrusion détectée. Contre-mesures déployées.");
+  let s=30;const lt=document.getElementById("lockT");
+  const tm=setInterval(()=>{lt.textContent=`TRACE COMPLÈTE — IC NOIRE DÉPLOYÉE — REDÉMARRAGE DANS ${s}s`;if(--s<0){clearInterval(tm);resetTrace()}},1000);
+}
+function resetTrace(){state.trace=50;state.locked=false;document.getElementById("lockdown").classList.remove("show");updateGauges();}
+document.getElementById("gmReset").onclick=()=>{state.trace=0;state.locked=false;document.getElementById("lockdown").classList.remove("show");updateGauges();};
+
+/* ---------- Modal ---------- */
+const modal=document.getElementById("modal"),codeIn=document.getElementById("codeIn"),msg=document.getElementById("msg"),mbox=document.getElementById("mbox");
+const pad=document.getElementById("pad");
+["1","2","3","4","5","6","7","8","9","-","0","⌫"].forEach(k=>{
+  const b=document.createElement("button");b.textContent=k;
+  b.onclick=()=>{sfxClick();if(k==="⌫")codeIn.value=codeIn.value.slice(0,-1);else codeIn.value+=k;codeIn.focus()};
+  pad.appendChild(b);
+});
+function openModal(file){
+  state.pending=file;mbox.classList.remove("ok");msg.textContent="";msg.style.color="";
+  document.getElementById("mtarget").textContent=`${file.dir}/${file.name} — ${LEVEL_NAMES[file.level]}`;
+  codeIn.value="";modal.classList.add("show");setTimeout(()=>codeIn.focus(),50);
+}
+function closeModal(){modal.classList.remove("show");state.pending=null}
+function submitModal(){
+  if(state.locked)return;
+  const r=tryCode(codeIn.value);
+  if(r.ok){
+    mbox.classList.add("ok");msg.style.color="var(--green)";msg.textContent="✔ ACCESS GRANTED";
+    const f=state.pending;
+    setTimeout(()=>{closeModal();renderList();if(f&&state.unlocked[f.level])showFile(f)},800);
+  }else{
+    msg.style.color="var(--red)";msg.textContent=`✖ ACCESS DENIED — TRACE EN COURS (${state.trace}%)`;
+    codeIn.value="";
+  }
+}
+document.getElementById("mok").onclick=submitModal;
+document.getElementById("mcancel").onclick=closeModal;
+codeIn.addEventListener("keydown",e=>{if(e.key==="Enter")submitModal();if(e.key==="Escape")closeModal()});
+
+/* ---------- AR view ---------- */
+const listEl=document.getElementById("list"),viewer=document.getElementById("viewer"),searchEl=document.getElementById("search");
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function toHTML(t){
+  let out="",inList=false;
+  t.split("\n").forEach(l=>{
+    if(l.startsWith("- ")){if(!inList){out+="<ul>";inList=true}out+="<li>"+esc(l.slice(2))+"</li>";return}
+    if(inList){out+="</ul>";inList=false}
+    if(l.startsWith("## "))out+="<h3>"+esc(l.slice(3))+"</h3>";
+    else if(l.trim())out+="<p>"+esc(l)+"</p>";
+  });
+  if(inList)out+="</ul>";return out;
+}
+function matches(f,q){
+  q=q.trim().toLowerCase();if(!q)return true;
+  return [f.title,f.name,f.dir,f.summary,...f.kw].join(" ").toLowerCase().includes(q);
+}
+function renderList(){
+  const q=searchEl.value;listEl.innerHTML="";
+  const res=FILES.filter(f=>matches(f,q));
+  if(!res.length){listEl.innerHTML='<div class="empty" style="margin-top:20px">// AUCUN RÉSULTAT //</div>';return}
+  res.forEach(f=>{
+    const unl=!!state.unlocked[f.level];
+    const d=document.createElement("div");d.className="card"+(state.selected===f.id?" sel":"");
+    d.innerHTML=`<span class="lvl l${f.level}">${unl?"":"🔒 "}${LEVEL_NAMES[f.level]}</span><div class="path">${f.dir}/</div><h3>${esc(f.title)}</h3><p>${esc(f.summary)}</p>`;
+    d.onclick=()=>{sfxClick();unl?showFile(f):openModal(f)};
+    listEl.appendChild(d);
+  });
+}
+function showFile(f){
+  state.selected=f.id;renderList();
+  document.getElementById("ar").classList.add("reading");
+  viewer.innerHTML=`<button class="backbtn" onclick="backToList()">◂ RETOUR</button><h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${LEVEL_NAMES[f.level]} · HOST BOREALIS-9</div>`+
+    (f.level>=2?'<div class="stamp">ULTRA-CONFIDENTIEL</div>':'')+
+    [].concat(f.img||[]).map(k=>`<img class="illus" src="${imgSrc(k)}" alt="${k}" onerror="this.onerror=null;this.src=placeholder('${k}')" style="clear:right">`).join("")+toHTML(f.text);
+  viewer.scrollTop=0;
+}
+searchEl.addEventListener("input",renderList);
+const chips=document.getElementById("chips");
+["Marshall","Orichalque","Givre","Janus","Ruche"].forEach(k=>{
+  const b=document.createElement("button");b.className="chip";b.textContent=k;
+  b.onclick=()=>{searchEl.value=k;renderList()};chips.appendChild(b);
+});
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===t.dataset.mode));
+  if(t.dataset.mode==="cli")setTimeout(()=>cmdEl.focus(),50);
+});
+
+/* ---------- Terminal ---------- */
+const out=document.getElementById("out"),cmdEl=document.getElementById("cmd"),promptEl=document.getElementById("prompt");
+function print(txt,cls){const d=document.createElement("div");if(cls)d.className=cls;d.textContent=txt;out.appendChild(d);out.scrollTop=out.scrollHeight}
+function setPrompt(){promptEl.textContent=`decker@borealis:${state.cwd}$`}
+const DIRS=["/root/PROJECT_BOREALIS","/logs/medical","/classified/JANUS","/classified/GHOST"];
+function resolveFile(arg){
+  if(!arg)return null;
+  const a=arg.toLowerCase();
+  return FILES.find(f=>(f.dir+"/"+f.name).toLowerCase()===a||
+    (state.cwd!=="/"&&(state.cwd+"/"+f.name).toLowerCase()===a)||
+    f.name.toLowerCase()===a);
+}
+function banner(){
+  print("JACKPOINT v5.78 — AZTECHNOLOGY HOST ID : BOREALIS-9","info");
+  print("Connexion au nœud sécurisé établie. Tapez 'help' pour les commandes.\n","info");
+}
+function run(line){
+  print(promptEl.textContent+" "+line);
+  const [cmd,...rest]=line.trim().split(/\s+/);const arg=rest.join(" ");
+  if(!cmd)return;
+  if(state.locked){print("SYSTÈME EN LOCKDOWN — IC NOIRE ACTIVE.","err");return}
+  switch(cmd.toLowerCase()){
+    case "help":
+      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
+    case "clear":out.innerHTML="";break;
+    case "status":
+      print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
+      [1,2,3].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
+    case "tree":
+      print("/");DIRS.forEach(d=>{print("├── "+d);FILES.filter(f=>f.dir===d).forEach(f=>print(`│    └── ${f.name} ${state.unlocked[f.level]?"":"[🔒]"}`))});break;
+    case "ls":{
+      let d=arg?(arg.startsWith("/")?arg:(state.cwd==="/"?"/"+arg:state.cwd+"/"+arg)):state.cwd;
+      d=d.replace(/\/$/,"")||"/";
+      if(d==="/"){
+        DIRS.forEach(x=>print(x+"/","info"));
+      }else{
+        const fs=FILES.filter(f=>f.dir===d);
+        if(!fs.length){print(`ls: ${d}: dossier introuvable`,"err");break}
+        fs.forEach(f=>print(`${state.unlocked[f.level]?"-rw-":"-LOCK"}  ${LEVEL_NAMES[f.level].padEnd(14)} ${f.name}`));
+      }
+      break;}
+    case "cd":
+      if(!arg||arg==="/"||arg==="~"){state.cwd="/";}
+      else if(arg===".."){state.cwd="/"}
+      else{
+        const t=arg.startsWith("/")?arg.replace(/\/$/,""):(state.cwd==="/"?"/"+arg:state.cwd+"/"+arg);
+        const m=DIRS.find(x=>x.toLowerCase()===t.toLowerCase())||DIRS.find(x=>x.toLowerCase().endsWith("/"+arg.toLowerCase().replace(/\/$/,"")));
+        if(m)state.cwd=m;else print(`cd: ${arg}: dossier introuvable`,"err");
+      }
+      setPrompt();break;
+    case "cat":{
+      const f=resolveFile(arg);
+      if(!f){print(`cat: ${arg||"?"}: fichier introuvable`,"err");break}
+      if(!state.unlocked[f.level]){print("ACCÈS REFUSÉ — SIGHASH OBLIGATOIRE\nUtilisez : unlock <code>","err");break}
+      print("=== "+f.title+" ===","info");
+      print(f.text.replace(/^## /gm,"# "));break;}
+    case "unlock":{
+      if(!arg){print("Usage : unlock <code>","warn");break}
+      const r=tryCode(arg);
+      if(r.ok){print(`ACCESS GRANTED — ${LEVEL_NAMES[r.level]} déverrouillé.`,"info");renderList()}
+      else print(`ACCESS DENIED - TRACE EN COURS (${state.trace}%)`,"err");
+      break;}
+    case "search":{
+      if(!arg){print("Usage : search <mot-clé>","warn");break}
+      const r=FILES.filter(f=>matches(f,arg));
+      if(!r.length)print("Aucun résultat.","warn");
+      r.forEach(f=>print(`${f.dir}/${f.name}  [${LEVEL_NAMES[f.level]}${state.unlocked[f.level]?"":" · VERROUILLÉ"}]`));break;}
+    default:print(`${cmd}: commande inconnue. Tapez 'help'.`,"err");
+  }
+}
+const hist=[];let hi=0;
+cmdEl.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){const v=cmdEl.value;cmdEl.value="";if(v.trim()){hist.push(v);hi=hist.length}run(v)}
+  else if(e.key==="ArrowUp"){if(hi>0)cmdEl.value=hist[--hi]||"";e.preventDefault()}
+  else if(e.key==="ArrowDown"){hi=Math.min(hist.length,hi+1);cmdEl.value=hist[hi]||"";e.preventDefault()}
+});
+document.getElementById("cli").addEventListener("click",()=>cmdEl.focus());
+
+/* ---------- Init ---------- */
+function backToList(){document.getElementById("ar").classList.remove("reading")}
+/* Liens directs pour QR codes : index.html#f=marshall (ids : geo, news, meteo, marshall, janus, ghost) */
+function handleHash(){
+  const m=location.hash.match(/f=([a-z]+)/i);if(!m)return;
+  const f=FILES.find(x=>x.id===m[1].toLowerCase());if(!f)return;
+  document.querySelector('.tab[data-mode="ar"]').click();
+  state.unlocked[f.level]?showFile(f):openModal(f);
+}
+let started=false;
+document.getElementById("startBtn").onclick=()=>{
+  started=true;document.getElementById("start").style.display="none";
+  startAudio();handleHash();
+};
+window.addEventListener("hashchange",()=>{if(started)handleHash()});
+const sndBtn=document.getElementById("snd");
+sndBtn.onclick=()=>{setMuted(!muted);sndBtn.textContent=muted?"♪ OFF":"♪ ON"};
+banner();renderList();updateGauges();setPrompt();
+</script>
+</body>
+</html>
