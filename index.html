@@ -46,6 +46,14 @@ header{padding:10px 16px;border-bottom:1px solid var(--line);background:linear-g
 .pb .ts{color:var(--dim);font-size:10px;margin-left:8px;font-weight:normal;text-shadow:none}
 .pb p{font-size:13px;line-height:1.55;margin-top:3px;color:var(--text)}
 .thread .cm{padding:6px 14px;color:var(--dim);font-size:10px;letter-spacing:1px;border-top:1px dashed var(--line)}
+.ftool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;max-width:900px}
+#fsearch{flex:1;min-width:180px;background:#000;border:1px solid var(--cyan);color:var(--green);padding:9px 10px;font-family:inherit;font-size:13px;outline:none}
+#fsearch:focus{box-shadow:0 0 10px var(--cyan)}
+#fsort{background:transparent;border:1px solid var(--line);color:var(--cyan);padding:9px 12px;font-size:12px;letter-spacing:1px;font-family:inherit;cursor:pointer}
+#fsort:hover{border-color:var(--cyan)}
+#fcount{color:var(--dim);font-size:11px;letter-spacing:1px}
+#threads mark{background:var(--amber);color:#000;padding:0 2px}
+@media (max-width:760px){#fsearch{font-size:16px}}
 .tab,button{font-family:inherit;cursor:pointer}
 .tab{background:transparent;border:1px solid var(--line);color:var(--dim);padding:7px 14px;font-size:12px;letter-spacing:1px}
 .tab.active{color:var(--bg);background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px var(--cyan)}
@@ -173,6 +181,11 @@ main{flex:1;min-height:0;position:relative}
     <section id="feed" class="view">
       <div class="fhead">JACKPOINT // SHADOWTALK (FEED PUBLIC)</div>
       <div class="fsub">Accès libre · Niveau 0 · Les posts sont anonymes, non vérifiés, et probablement surveillés.</div>
+      <div class="ftool">
+        <input id="fsearch" placeholder="⌕ Rechercher dans le forum : Plan 9, Orichalque, Aztlan…" autocomplete="off">
+        <button id="fsort" type="button">TRI : PLUS RÉCENTS ▾</button>
+        <span id="fcount"></span>
+      </div>
       <div id="threads"></div>
     </section>
   </main>
@@ -427,17 +440,34 @@ const THREADS = [
       ["Rurik_D","Je te le prends à 350 ¥ si tu me le déposes dans une boîte morte sécurisée à Downtown. Ne touche à rien d'autre dessus."]]}
 ];
 function avatar(h){const a=HANDLES[h]||[h.slice(0,2).toUpperCase(),"#9aa7b5"];return `<div class="av" style="color:${a[1]}">${esc(a[0])}</div>`}
+const fstate={sort:"new",q:""};
+const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function tsKey(ts){const m=ts.match(/(\d+) (\w+) (\d+) - (\d+):(\d+):(\d+)/);return m?Date.UTC(+m[3],MON[m[2]]||0,+m[1],+m[4],+m[5],+m[6]):0}
+function nz(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase()}  /* insensible aux accents et à la casse */
+function hl(s,q){  /* texte échappé, avec les mots recherchés surlignés */
+  const k=nz(q.trim());if(!k)return esc(s);
+  const n=nz(s);let out="",i=0,j;
+  while((j=n.indexOf(k,i))>=0){out+=esc(s.slice(i,j))+"<mark>"+esc(s.slice(j,j+k.length))+"</mark>";i=j+k.length}
+  return out+esc(s.slice(i));
+}
+function threadMatches(t,q){const k=nz((q||"").trim());return !k||nz([t.tag,t.title,t.who,t.text,...t.re.flat()].join(" ")).includes(k)}
 function renderFeed(){
-  document.getElementById("threads").innerHTML=THREADS.map((t,i)=>{
+  const q=fstate.q;
+  const list=THREADS.filter(t=>threadMatches(t,q)).sort((a,b)=>fstate.sort==="new"?tsKey(b.ts)-tsKey(a.ts):tsKey(a.ts)-tsKey(b.ts));
+  document.getElementById("fsort").textContent="TRI : "+(fstate.sort==="new"?"PLUS RÉCENTS ▾":"PLUS ANCIENS ▴");
+  document.getElementById("fcount").textContent=list.length+" / "+THREADS.length+" FILS";
+  document.getElementById("threads").innerHTML=list.length?list.map(t=>{
     const col=(HANDLES[t.who]||[0,"#9aa7b5"])[1];
-    let h=`<div class="thread"><div class="tt"><b>[${esc(t.tag)}]</b>${esc(t.title)}</div>`+
-      `<div class="post">${avatar(t.who)}<div class="pb"><div class="who" style="color:${col}">${esc(t.who)}<span class="ts">${esc(t.ts)}</span></div><p>« ${esc(t.text)} »</p></div></div>`+
+    let h=`<div class="thread"><div class="tt"><b>[${hl(t.tag,q)}]</b>${hl(t.title,q)}</div>`+
+      `<div class="post">${avatar(t.who)}<div class="pb"><div class="who" style="color:${col}">${hl(t.who,q)}<span class="ts">${esc(t.ts)}</span></div><p>« ${hl(t.text,q)} »</p></div></div>`+
       `<div class="cm">💬 ${t.re.length} COMMENTAIRES</div>`;
     t.re.forEach(r=>{const c=(HANDLES[r[0]]||[0,"#9aa7b5"])[1];
-      h+=`<div class="post re">${avatar(r[0])}<div class="pb"><div class="who" style="color:${c}">${esc(r[0])}</div><p>${esc(r[1])}</p></div></div>`});
+      h+=`<div class="post re">${avatar(r[0])}<div class="pb"><div class="who" style="color:${c}">${hl(r[0],q)}</div><p>${hl(r[1],q)}</p></div></div>`});
     return h+"</div>";
-  }).join("");
+  }).join(""):'<div class="empty" style="margin-top:30px">// AUCUN FIL NE CORRESPOND //</div>';
 }
+document.getElementById("fsearch").addEventListener("input",e=>{fstate.q=e.target.value;renderFeed()});
+document.getElementById("fsort").onclick=()=>{fstate.sort=fstate.sort==="new"?"old":"new";renderFeed()};
 
 const state = {unlocked:{0:true}, trace:0, cwd:"/", selected:null, pending:null, locked:false};
 try{const s=JSON.parse(localStorage.getItem("bor9")||"null"); if(s){state.unlocked=Object.assign({0:true},s.unlocked);}}catch(e){}
@@ -650,14 +680,16 @@ function run(line){
   if(state.locked){print("SYSTÈME EN LOCKDOWN — IC NOIRE ACTIVE.","err");return}
   switch(cmd.toLowerCase()){
     case "help":
-      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  reset             (MJ) tout reverrouiller, trace à 0\n  shadowtalk        lire le forum JackPoint (public)\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
+      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  reset             (MJ) tout reverrouiller, trace à 0\n  shadowtalk [mot]  lire le forum JackPoint (récents d'abord, filtre optionnel)\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
     case "shadowtalk":case "feed":
       print("=== JACKPOINT // SHADOWTALK (FEED PUBLIC) ===","info");
-      THREADS.forEach(t=>{
+      {const fl=THREADS.filter(t=>threadMatches(t,arg)).sort((a,b)=>tsKey(b.ts)-tsKey(a.ts));
+      if(!fl.length){print(`Aucun fil ne correspond à « ${arg} ».`,"warn");break}
+      fl.forEach(t=>{
         print(`\n[${t.tag}] ${t.title}`,"warn");
         print(`> ${t.who} (${t.ts}) : « ${t.text} »`);
         t.re.forEach(r=>print(`    - ${r[0]} : ${r[1]}`));
-      });break;
+      });}break;
     case "reset":
       resetAll();out.innerHTML="";state.cwd="/";setPrompt();
       print("Console réinitialisée : tous les verrous remis, trace à 0%.","info");break;
