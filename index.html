@@ -608,7 +608,7 @@ function run(line){
   if(state.locked){print("SYSTÈME EN LOCKDOWN — IC NOIRE ACTIVE.","err");return}
   switch(cmd.toLowerCase()){
     case "help":
-      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  shadowtalk        lire le forum JackPoint (public)\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
+      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  reset             (MJ) tout reverrouiller, trace à 0\n  shadowtalk        lire le forum JackPoint (public)\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
     case "shadowtalk":case "feed":
       print("=== JACKPOINT // SHADOWTALK (FEED PUBLIC) ===","info");
       THREADS.forEach(t=>{
@@ -616,6 +616,9 @@ function run(line){
         print(`> ${t.who} (${t.ts}) : « ${t.text} »`);
         t.re.forEach(r=>print(`    - ${r[0]} : ${r[1]}`));
       });break;
+    case "reset":
+      resetAll();out.innerHTML="";state.cwd="/";setPrompt();
+      print("Console réinitialisée : tous les verrous remis, trace à 0%.","info");break;
     case "clear":out.innerHTML="";break;
     case "status":
       print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
@@ -673,8 +676,29 @@ document.getElementById("cli").addEventListener("click",()=>cmdEl.focus());
 /* ---------- Init ---------- */
 function backToList(){document.getElementById("ar").classList.remove("reading")}
 /* Liens directs pour QR codes : index.html#f=marshall (ids : geo, news, meteo, marshall, janus, ghost) */
+function toast(t){
+  let e=document.getElementById("toast");
+  if(!e){e=document.createElement("div");e.id="toast";
+    e.style.cssText="position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:90;background:#000;border:1px solid var(--green);color:var(--green);padding:10px 16px;letter-spacing:2px;font-size:13px;box-shadow:0 0 18px rgba(0,255,102,.5)";
+    document.body.appendChild(e)}
+  e.textContent=t;e.style.display="block";clearTimeout(e._t);e._t=setTimeout(()=>e.style.display="none",3000);
+}
+/* Remise à zéro MJ : reverrouille tout, trace à 0 (terminal : reset · lien : #reset) */
+function resetAll(){
+  try{localStorage.removeItem("bor9")}catch(e){}
+  state.unlocked={0:true};state.trace=0;state.locked=false;state.selected=null;state.pending=null;
+  document.getElementById("lockdown").classList.remove("show");closeModal();
+  document.getElementById("ar").classList.remove("reading");
+  viewer.innerHTML='<div class="empty">// AUCUN FICHIER SÉLECTIONNÉ //<br><br>Sélectionnez un fichier dans l\'arborescence.</div>';
+  updateGauges();renderList();
+}
+/* Liens directs : #f=marshall … #f=feed (forum) · #reset (remise à zéro) */
 function handleHash(){
+  if(/reset/i.test(location.hash)){
+    resetAll();history.replaceState(null,"",location.pathname+location.search);toast("◈ CONSOLE RÉINITIALISÉE");return;
+  }
   const m=location.hash.match(/f=([a-z]+)/i);if(!m)return;
+  if(m[1].toLowerCase()==="feed"){document.querySelector('.tab[data-mode="feed"]').click();return}
   const f=FILES.find(x=>x.id===m[1].toLowerCase());if(!f)return;
   document.querySelector('.tab[data-mode="ar"]').click();
   state.unlocked[f.level]?showFile(f):openModal(f);
@@ -688,6 +712,7 @@ window.addEventListener("hashchange",()=>{if(started)handleHash()});
 const sndBtn=document.getElementById("snd");
 sndBtn.onclick=()=>{setMuted(!muted);sndBtn.textContent=muted?"♪ OFF":"♪ ON"};
 banner();renderList();renderFeed();updateGauges();setPrompt();
+if(/reset/i.test(location.hash))handleHash();
 </script>
 </body>
 </html>
