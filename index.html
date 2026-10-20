@@ -363,7 +363,10 @@ Le commanditaire final est lié au Territoire du Grand Dragon Ghostwalker. L'éq
 const HANDLES = {
  "Seattle_News_Bot":["SN","#00e5ff"],"Slamm-0!":["S0","#ff2d4a"],"Bull":["BU","#ff9900"],"Clockwork":["CW","#9aa7b5"],
  "Netcat":["NC","#00ff66"],"Puck":["PK","#00e5ff"],"Plan 9":["P9","#ff4df2"],"FastJack":["FJ","#00ff66"],
- "Glitch":["GL","#00e5ff"],"Kestrel":["KS","#ff9900"],"Haze":["HZ","#9aa7b5"]
+ "Glitch":["GL","#00e5ff"],"Kestrel":["KS","#ff9900"],"Haze":["HZ","#9aa7b5"],
+ "WallStreet_Runner":["WS","#ff9900"],"Lyran":["LY","#ff4df2"],"Winterhawk":["WH","#00e5ff"],"Denver_Insider":["DI","#ff2d4a"],
+ "Sprawl_Walker":["SW","#9aa7b5"],"Snopes":["SP","#00ff66"],"Frosty":["FR","#00e5ff"],"StreetDoc_Gonzo":["SG","#ff9900"],
+ "Neoncowboy":["NK","#ff4df2"],"Scrappy_Ork":["SO","#ff2d4a"],"Rurik_D":["RD","#00ff66"]
 };
 const THREADS = [
  {tag:"NEWS SEATTLE", title:"Renforcement des patrouilles de Knight Errant à Redmond",
@@ -382,7 +385,46 @@ const THREADS = [
   who:"Glitch", ts:"20 Oct 2078 - 02:00:15",
   text:"Avis aux contrebandiers et riggers de la zone : Aztechnology et le Conseil du Salish ont fermé les accès routiers au sud du secteur Rainier. Prétexte officiel : « glissement de terrain et risques géothermiques ».",
   re:[["Kestrel","Laisse-moi deviner : le périmètre est surveillé par des gardes armés en armure de combat Aztlan ? Pour un glissement de terrain, ils ont sorti les hélicoptères d'attaque."],
-      ["Haze","Si quelqu'un cherche un contrat là-bas, révisez votre latin et prévoyez des munitions perforantes. L'air pue le mana vicié à dix kilomètres."]]}
+      ["Haze","Si quelqu'un cherche un contrat là-bas, révisez votre latin et prévoyez des munitions perforantes. L'air pue le mana vicié à dix kilomètres."]]},
+ {tag:"ÉCONOMIE NOIRE", title:"Flambée des cours de l'Orichalque à la Bourse de Tacoma",
+  who:"WallStreet_Runner", ts:"20 Oct 2078 - 08:30:11",
+  text:"Le gramme d'Orichalque brut a pris +34 % en une semaine sur les marchés gris de Seattle. Les vendeurs de composants arcaniques de Téléstra et du quartier elfe de Tarislar sont en rupture de stock totale.",
+  re:[["Lyran","Une hausse pareille ne s'explique pas par la demande des initiés locaux. Quelqu'un est en train de constituer un stock stratégique à l'échelle industrielle."],
+      ["Winterhawk","Ou alors, une mégacorporation prépare un rituel de stabilisation de grande ampleur. Et quand les corps achètent de l'Orichalque en masse, ce n'est jamais pour fabriquer des bijoux de famille."],
+      ["Slamm-0!","Moi qui voulais juste m'acheter une amulette contre les maux de tête... Je vais devoir payer en reins ?"]]},
+ {tag:"MATÉRIEL & CYBER", title:"Mise à jour firmware Transys Avalon v8.4 : À ÉVITER !",
+  who:"Netcat", ts:"20 Oct 2078 - 10:14:55",
+  text:"Alerte à tous les technomanciens et deckers : la dernière mise à jour de sécurité des comlinks Transys Avalon installe un démon d'arrière-plan qui scanne les signatures d'ASPS (Aura Sensory Processing Systems).",
+  re:[["Clockwork","Encore un coup des paranoïaques d'Evo. Si vous utilisiez du matériel Mil-Spec renforcé comme des pros au lieu de vos jouets pour civils, vous n'auriez pas ce problème."],
+      ["Puck","Le code de cette MàJ contient des lignes de compilation marquées « BOREALIS_PATCH_09 ». Ça ne vient pas de Transys, ça a été injecté depuis un nœud relais d'Aztlan."],
+      ["FastJack","Bien vu Puck. Bloquez le port 8088 sur vos grilles d'accès et repassez en protocole filaire si vous approchez du secteur sud."]]},
+ {tag:"SÉCURITÉ & TENSION", title:"Froideur diplomatique entre Denver et Aztlan",
+  who:"Denver_Insider", ts:"20 Oct 2078 - 12:05:40",
+  text:"Les représentants du Conseil de Denver ont annulé trois sommets commerciaux avec les émissaires d'Aztlan ce matin. Des mouvements de troupes de la Garde du Traité sont signalés le long du secteur nord.",
+  re:[["Haze","Le Grand Dragon Blanc ne déplace pas ses pions pour rien. Si Denver ferme ses frontières aux diplomates d'Aztechnology, c'est que les Lézards ont senti une odeur qui ne leur plaît pas."],
+      ["Bull","Ça sent la poudre sur la frontière du Salish. Si vous avez des runs d'extraction prévus entre Denver et Seattle, doublez votre tarif d'aussi sec."]]},
+ {tag:"URBAN LORE", title:"Les « Enfants Disparus » du Métro Volcanique",
+  who:"Sprawl_Walker", ts:"20 Oct 2078 - 13:22:18",
+  text:"Légende urbaine ou réalité ? Des squatteurs des tunnels abandonnés sous Puyallup affirment avoir entendu des comptines antiques chantées en chœur dans les conduits de ventilation géothermiques...",
+  re:[["Snopes","Faux. C'est juste un phénomène de résonance acoustique dû à la vapeur des sous-sols volcaniques qui fait vibrer les vieilles tuyauteries."],
+      ["Plan 9","Mais oui, c'est ça ! Des tuyauteries qui chantent en dialecte pré-chamanique ! Ouvrez les yeux, c'est la preuve que les esprits du 4e Monde essaient de nous passer un coup de comlink !"],
+      ["Kestrel","Légende ou pas, trois gangs de gangers orques ont déserté ces galeries la semaine dernière. Ils avaient l'air terrifiés."]]},
+ {tag:"ARCHÉOLOGIE & OCCULTE", title:"Vente aux enchères d'artefacts d'alliage inconnu à Tacoma",
+  who:"Lyran", ts:"20 Oct 2078 - 14:02:11",
+  text:"La maison de vente d'Orting met aux enchères un lot de métaux antiques exhumés dans le Salish. La fiche technique parle d'un alliage d'orichalque à structure mnémonique. La Fondation Draco a déjà posé un droit de préemption.",
+  re:[["Frosty","Si la Fondation est sur le coup, c'est que la datation remonte à avant le Premier Éveil. Évitez d'enchérir si vous ne voulez pas avoir les avocats de Dunky sur le dos."],
+      ["Plan 9","Encore du matos scellé d'avant le Châtiment ! Je vous parie 100 nuyens que la signature d'alliage correspond aux structures sous le Rainier !"],
+      ["Winterhawk","Plan 9, la ferme. Mais sur la datation, il n'a pas tout à fait tort. Si ces pièces sortent de terre maintenant, c'est que quelqu'un a brisé un confinement."]]},
+ {tag:"RUE & DROGUES", title:"La « Poussière d'Ambre » sur les marchés noirs de Puyallup",
+  who:"StreetDoc_Gonzo", ts:"20 Oct 2078 - 14:15:30",
+  text:"Une nouvelle substance alchimique fait des ravages chez les puces-addicts des Barrens : « l'Ambre ». Les usagers rapportent des hallucinations collectives étrangement précises (« des souvenirs de gamin enfermé dans une caverne sous un volcan »).",
+  re:[["Neoncowboy","Encore de la cochonnerie alchimique coupée aux stéroïdes. N'y touchez pas, ça vous grille les synapses en 48 h."],
+      ["Puck","Ce ne sont pas des molécules synthétiques ordinaires. La signature psychique sur la Matrice ressemble à une fuite de paquets de données provenant du nœud BOREALIS..."]]},
+ {tag:"PETITES ANNONCES", title:"Vente d'un Datapad Aztlan « Trouvé dans le Rainier »",
+  who:"Scrappy_Ork", ts:"20 Oct 2078 - 14:35:00",
+  text:"Vends datapad blindé Aztechnology récupéré dans un conteneur au sud du Mont Rainier. Bloqué sur un écran d'accueil crypté BOREALIS-9. Prix : 500 ¥ ou échange contre du matos de rigger.",
+  re:[["Slamm-0!","500 nuyens pour une brique verrouillée par Aztlan ? Tu veux qu'un commando Firewatch ou Jaguar débarque chez toi à 3h du matin ?"],
+      ["Rurik_D","Je te le prends à 350 ¥ si tu me le déposes dans une boîte morte sécurisée à Downtown. Ne touche à rien d'autre dessus."]]}
 ];
 function avatar(h){const a=HANDLES[h]||[h.slice(0,2).toUpperCase(),"#9aa7b5"];return `<div class="av" style="color:${a[1]}">${esc(a[0])}</div>`}
 function renderFeed(){
