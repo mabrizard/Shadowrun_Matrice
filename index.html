@@ -76,13 +76,15 @@ main{flex:1;min-height:0;position:relative}
 /* Modal */
 #modal,#lockdown{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8)}
 #modal.show,#lockdown.show{display:flex}
-.box{width:min(380px,92vw);background:var(--panel);border:1px solid var(--red);padding:22px;text-align:center;box-shadow:0 0 30px rgba(255,45,74,.4)}
+.box{width:min(480px,95vw);background:var(--panel);border:1px solid var(--red);padding:22px;text-align:center;box-shadow:0 0 30px rgba(255,45,74,.4)}
 .box.ok{border-color:var(--green);box-shadow:0 0 40px rgba(0,255,102,.6)}
 .box h2{color:var(--red);font-size:16px;letter-spacing:2px;margin-bottom:6px}
 .box p{color:var(--dim);font-size:12px;margin-bottom:12px}
 .box input{width:100%;background:#000;border:1px solid var(--cyan);color:var(--green);padding:10px;text-align:center;font-family:inherit;font-size:16px;letter-spacing:2px;text-transform:uppercase;outline:none}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
-.pad button{background:#000;border:1px solid var(--line);color:var(--cyan);padding:9px 0;font-size:13px}
+.pad{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:12px 0}
+.pad button{background:#000;border:1px solid var(--line);color:var(--cyan);padding:11px 0;font-size:14px;touch-action:manipulation}
+.pad button.del{color:var(--amber)}
+.pad button:active{background:var(--cyan);color:#000}
 .pad button:hover{border-color:var(--cyan)}
 .row{display:flex;gap:8px}
 .row button{flex:1;padding:10px;border:1px solid var(--green);background:transparent;color:var(--green);font-size:13px;letter-spacing:1px}
@@ -190,8 +192,8 @@ const IMAGES = {
 };
 /* ========================================================================================= */
 
-const CODES = {2:"JANUS-7000", 3:"GHOST-DENVER", 4:"MARSHALL-2078"};
-const LEVEL_NAMES = {0:"PUBLIC",2:"NIVEAU 2",3:"FICHIER OMBRE",4:"NIVEAU 4"};
+const CODES = {1:"NURI", 2:"JANUS-7000", 3:"GHOST-DENVER", 4:"MARSHALL-2078"};
+const LEVEL_NAMES = {0:"PUBLIC",1:"NIVEAU 1",2:"NIVEAU 2",3:"FICHIER OMBRE",4:"NIVEAU 4"};
 
 const FILES = [
  {id:"geo", dir:"/root/PROJECT_BOREALIS", name:"geologie_rainier.txt", level:0,
@@ -243,9 +245,10 @@ Flux public, non vérifié. Toute corrélation avec des opérations internes est
 
 ## Consigne
 Les équipes de nuit ne doivent pas rester seules sur le niveau -3. Rapporter toute perception sonore anormale au superviseur.`},
- {id:"medpub", dir:"/logs/medical", name:"public_report.txt", level:0,
+ {id:"medpub", dir:"/logs/medical", name:"public_report.txt", level:1,
   title:"Rapport médical — Chantier BOREALIS", kw:["marshall","nuri","medical","migraine","demence","givre","murmures","rapport"],
   summary:"Service médical : migraines des équipes de forage, demande d'arrêt des travaux.",
+  img:"marshall",
   text:`## Dr Nuri Marshall — Notes cliniques confidentielles
 Service médical Aztechnology · Chantier BOREALIS
 
@@ -266,7 +269,7 @@ Aucun agent pathogène ou toxique détecté. Les analyses astrales internes ont 
  {id:"marshall", dir:"/logs/medical", name:"marshall_classified.txt", level:4,
   title:"Journal de recherche — Dr Nuri Marshall", kw:["marshall","nuri","cuves","cobayes","sujets","dni","magie du sang","hate","haine","horreur","voix","ruche","reine","orichalque","janus","secteur -3","sas"],
   summary:"Journal confidentiel de la Direction scientifique BOREALIS / JANUS.",
-  img:["marshall","labo"],
+  img:"labo",
   text:`## JOURNAL DE RECHERCHE — DIRECTION SCIENTIFIQUE BOREALIS / JANUS
 Dr Nuri Marshall · Accès : Direction uniquement · Copie interdite
 
@@ -406,9 +409,9 @@ function updateGauges(){
   const tb=document.getElementById("traceBar");
   tb.style.width=t+"%";
   tb.style.background=t<40?"var(--green)":t<75?"var(--amber)":"var(--red)";
-  const n=[2,3,4].filter(l=>state.unlocked[l]).length;
-  document.getElementById("bfV").textContent=n+"/3";
-  document.getElementById("bfBar").style.width=(n/3*100)+"%";
+  const n=[1,2,3,4].filter(l=>state.unlocked[l]).length;
+  document.getElementById("bfV").textContent=n+"/4";
+  document.getElementById("bfBar").style.width=(n/4*100)+"%";
 }
 function flash(cls){document.body.classList.remove("flashG","flashR");void document.body.offsetWidth;document.body.classList.add(cls);}
 
@@ -440,11 +443,16 @@ document.getElementById("gmReset").onclick=()=>{state.trace=0;state.locked=false
 /* ---------- Modal ---------- */
 const modal=document.getElementById("modal"),codeIn=document.getElementById("codeIn"),msg=document.getElementById("msg"),mbox=document.getElementById("mbox");
 const pad=document.getElementById("pad");
-["1","2","3","4","5","6","7","8","9","-","0","⌫"].forEach(k=>{
-  const b=document.createElement("button");b.textContent=k;
-  b.onclick=()=>{sfxClick();if(k==="⌫")codeIn.value=codeIn.value.slice(0,-1);else codeIn.value+=k;codeIn.focus()};
-  pad.appendChild(b);
+/* Clavier alphanumérique AZERTY */
+["1234567890","AZERTYUIOP","QSDFGHJKLM","WXCVBN-⌫"].forEach(row=>{
+  [...row].forEach(k=>{
+    const b=document.createElement("button");b.type="button";b.textContent=k;
+    if(k==="⌫")b.className="del";
+    b.onclick=()=>{sfxClick();if(k==="⌫")codeIn.value=codeIn.value.slice(0,-1);else if(codeIn.value.length<24)codeIn.value+=k};
+    pad.appendChild(b);
+  });
 });
+codeIn.setAttribute("inputmode","none");
 function openModal(file){
   state.pending=file;mbox.classList.remove("ok");msg.textContent="";msg.style.color="";
   document.getElementById("mtarget").textContent=`${file.dir}/${file.name} — ${LEVEL_NAMES[file.level]}`;
@@ -545,7 +553,7 @@ function run(line){
     case "clear":out.innerHTML="";break;
     case "status":
       print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
-      [2,3,4].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
+      [1,2,3,4].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
     case "tree":
       print("/");DIRS.forEach(d=>{print("├── "+d);FILES.filter(f=>f.dir===d).forEach(f=>print(`│    └── ${f.name} ${state.unlocked[f.level]?"":"[🔒]"}`))});break;
     case "ls":{
