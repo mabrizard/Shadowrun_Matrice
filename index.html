@@ -30,7 +30,22 @@ header{padding:10px 16px;border-bottom:1px solid var(--line);background:linear-g
 .gauge label{font-size:10px;color:var(--dim);letter-spacing:1px;display:flex;justify-content:space-between}
 .bar{height:8px;border:1px solid var(--line);background:#000;margin-top:3px;position:relative}
 .bar i{display:block;height:100%;width:0;background:var(--green);box-shadow:0 0 8px currentColor;transition:width .4s,background .4s}
-.tabs{display:flex;gap:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+/* JackPoint / Shadowtalk */
+#feed{flex-direction:column;overflow:auto;padding:14px 18px}
+#feed .fhead{color:var(--green);letter-spacing:2px;font-size:15px;text-shadow:0 0 8px var(--green);margin-bottom:2px}
+#feed .fsub{color:var(--dim);font-size:11px;border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:14px}
+.thread{border:1px solid var(--line);background:var(--panel);margin-bottom:16px;max-width:900px}
+.thread .tt{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--cyan);font-size:14px;letter-spacing:.5px}
+.thread .tt b{color:var(--amber);margin-right:6px}
+.post{display:flex;gap:10px;padding:10px 14px}
+.post.re{margin-left:26px;border-left:2px solid var(--line);padding-left:12px}
+.av{flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;border:1px solid currentColor;background:#000;text-shadow:0 0 6px currentColor}
+.pb{min-width:0}
+.pb .who{font-size:13px;font-weight:bold;text-shadow:0 0 6px currentColor}
+.pb .ts{color:var(--dim);font-size:10px;margin-left:8px;font-weight:normal;text-shadow:none}
+.pb p{font-size:13px;line-height:1.55;margin-top:3px;color:var(--text)}
+.thread .cm{padding:6px 14px;color:var(--dim);font-size:10px;letter-spacing:1px;border-top:1px dashed var(--line)}
 .tab,button{font-family:inherit;cursor:pointer}
 .tab{background:transparent;border:1px solid var(--line);color:var(--dim);padding:7px 14px;font-size:12px;letter-spacing:1px}
 .tab.active{color:var(--bg);background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px var(--cyan)}
@@ -138,6 +153,7 @@ main{flex:1;min-height:0;position:relative}
     <div class="tabs">
       <button class="tab active" data-mode="ar">◈ MODE AR</button>
       <button class="tab" data-mode="cli">▮ TERMINAL</button>
+      <button class="tab" data-mode="feed">☰ JACKPOINT</button>
       <button class="sndbtn" id="snd" title="Son">♪ ON</button>
     </div>
   </header>
@@ -153,6 +169,11 @@ main{flex:1;min-height:0;position:relative}
     <section id="cli" class="view">
       <div id="out"></div>
       <div id="cmdline"><span id="prompt">decker@borealis:/$</span><input id="cmd" autocomplete="off" spellcheck="false" autofocus></div>
+    </section>
+    <section id="feed" class="view">
+      <div class="fhead">JACKPOINT // SHADOWTALK (FEED PUBLIC)</div>
+      <div class="fsub">Accès libre · Niveau 0 · Les posts sont anonymes, non vérifiés, et probablement surveillés.</div>
+      <div id="threads"></div>
     </section>
   </main>
 </div>
@@ -337,6 +358,44 @@ Le paiement du contrat initial transite par une banque écran enregistrée à Se
 ## Conclusion
 Le commanditaire final est lié au Territoire du Grand Dragon Ghostwalker. L'équipe a été payée pour s'attaquer à BOREALIS par un tiers qui n'est pas Aztechnology.`}
 ];
+
+/* ---------- JackPoint / Shadowtalk (fluff public) ---------- */
+const HANDLES = {
+ "Seattle_News_Bot":["SN","#00e5ff"],"Slamm-0!":["S0","#ff2d4a"],"Bull":["BU","#ff9900"],"Clockwork":["CW","#9aa7b5"],
+ "Netcat":["NC","#00ff66"],"Puck":["PK","#00e5ff"],"Plan 9":["P9","#ff4df2"],"FastJack":["FJ","#00ff66"],
+ "Glitch":["GL","#00e5ff"],"Kestrel":["KS","#ff9900"],"Haze":["HZ","#9aa7b5"]
+};
+const THREADS = [
+ {tag:"NEWS SEATTLE", title:"Renforcement des patrouilles de Knight Errant à Redmond",
+  who:"Seattle_News_Bot", ts:"18 Oct 2078 - 04:12:09",
+  text:"Le préfet de police de Knight Errant annonce une augmentation de 15 % des patrouilles de drones Aerie au-dessus des Barrens de Redmond suite à une série de disparitions inexpliquées.",
+  re:[["Slamm-0!","Des disparitions inexpliquées ? Laissez-moi rire. Ça fait dix ans que des SINless s'évaporent sans que KE ne bouge le petit doigt. Cherchez plutôt quelle corpo ramasse les poubelles ce mois-ci."],
+      ["Bull","Garde tes théories pour toi, gamin. Mais si vous traînez du côté du Touristville, gardez votre comlink en mode silencieux et vos armes chargées."],
+      ["Clockwork","Si ces abrutis de SINless apprenaient à s'acheter une sécurité décente au lieu de se plaindre, on n'aurait pas ce débat."]]},
+ {tag:"MATRICE & TECH", title:"Surcharges de données sur la grille UCAS",
+  who:"Netcat", ts:"19 Oct 2078 - 11:45:22",
+  text:"Des variations anormales de bruit de fond magico-matriciel sont enregistrées depuis 72 h autour de la chaîne des Cascades. Les nœuds de routage d'Ares et d'Aztechnology tournent à 140 % de charge.",
+  re:[["Puck","Ce n'est pas un bug réseau classique. Les paquets de données ont des signatures d'atténuation qui ressemblent à de la résonance d'orichalque."],
+      ["Plan 9","C'est les Dragons ! Je vous l'avais dit ! Dunkelzahn n'est pas mort au Watergate, son esprit est coincé dans le sous-réseau du Mont Rainier et il essaie d'envoyer un fax à Ghostwalker !"],
+      ["FastJack","Plan 9, va prendre tes médicaments. Puck, garde un œil sur les logs d'Aztlan. S'ils augmentent la bande passante, c'est qu'ils creusent quelque chose."]]},
+ {tag:"RUMORS & JOBS", title:"Météo pourrie et périmètres fermés au Mont Rainier",
+  who:"Glitch", ts:"20 Oct 2078 - 02:00:15",
+  text:"Avis aux contrebandiers et riggers de la zone : Aztechnology et le Conseil du Salish ont fermé les accès routiers au sud du secteur Rainier. Prétexte officiel : « glissement de terrain et risques géothermiques ».",
+  re:[["Kestrel","Laisse-moi deviner : le périmètre est surveillé par des gardes armés en armure de combat Aztlan ? Pour un glissement de terrain, ils ont sorti les hélicoptères d'attaque."],
+      ["Haze","Si quelqu'un cherche un contrat là-bas, révisez votre latin et prévoyez des munitions perforantes. L'air pue le mana vicié à dix kilomètres."]]}
+];
+function avatar(h){const a=HANDLES[h]||[h.slice(0,2).toUpperCase(),"#9aa7b5"];return `<div class="av" style="color:${a[1]}">${esc(a[0])}</div>`}
+function renderFeed(){
+  document.getElementById("threads").innerHTML=THREADS.map((t,i)=>{
+    const col=(HANDLES[t.who]||[0,"#9aa7b5"])[1];
+    let h=`<div class="thread"><div class="tt"><b>[${esc(t.tag)}]</b>${esc(t.title)}</div>`+
+      `<div class="post">${avatar(t.who)}<div class="pb"><div class="who" style="color:${col}">${esc(t.who)}<span class="ts">${esc(t.ts)}</span></div><p>« ${esc(t.text)} »</p></div></div>`+
+      `<div class="cm">💬 ${t.re.length} COMMENTAIRES</div>`;
+    t.re.forEach(r=>{const c=(HANDLES[r[0]]||[0,"#9aa7b5"])[1];
+      h+=`<div class="post re">${avatar(r[0])}<div class="pb"><div class="who" style="color:${c}">${esc(r[0])}</div><p>${esc(r[1])}</p></div></div>`});
+    return h+"</div>";
+  }).join("");
+}
 
 const state = {unlocked:{0:true}, trace:0, cwd:"/", selected:null, pending:null, locked:false};
 try{const s=JSON.parse(localStorage.getItem("bor9")||"null"); if(s){state.unlocked=Object.assign({0:true},s.unlocked);}}catch(e){}
@@ -549,7 +608,14 @@ function run(line){
   if(state.locked){print("SYSTÈME EN LOCKDOWN — IC NOIRE ACTIVE.","err");return}
   switch(cmd.toLowerCase()){
     case "help":
-      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
+      print("Commandes :\n  ls [dossier]      lister le contenu\n  cd <dossier>      changer de dossier (cd / ou cd ..)\n  tree              arborescence complète\n  cat <fichier>     lire un fichier\n  unlock <code>     tenter un code d'accès\n  search <mot>      recherche par mot-clé\n  shadowtalk        lire le forum JackPoint (public)\n  status            état de la trace et des verrous\n  clear             effacer l'écran");break;
+    case "shadowtalk":case "feed":
+      print("=== JACKPOINT // SHADOWTALK (FEED PUBLIC) ===","info");
+      THREADS.forEach(t=>{
+        print(`\n[${t.tag}] ${t.title}`,"warn");
+        print(`> ${t.who} (${t.ts}) : « ${t.text} »`);
+        t.re.forEach(r=>print(`    - ${r[0]} : ${r[1]}`));
+      });break;
     case "clear":out.innerHTML="";break;
     case "status":
       print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
@@ -621,7 +687,7 @@ document.getElementById("startBtn").onclick=()=>{
 window.addEventListener("hashchange",()=>{if(started)handleHash()});
 const sndBtn=document.getElementById("snd");
 sndBtn.onclick=()=>{setMuted(!muted);sndBtn.textContent=muted?"♪ OFF":"♪ ON"};
-banner();renderList();updateGauges();setPrompt();
+banner();renderList();renderFeed();updateGauges();setPrompt();
 </script>
 </body>
 </html>
