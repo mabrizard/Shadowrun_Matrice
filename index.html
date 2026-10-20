@@ -46,6 +46,15 @@ header{padding:10px 16px;border-bottom:1px solid var(--line);background:linear-g
 .pb .ts{color:var(--dim);font-size:10px;margin-left:8px;font-weight:normal;text-shadow:none}
 .pb p{font-size:13px;line-height:1.55;margin-top:3px;color:var(--text)}
 .thread .cm{padding:6px 14px;color:var(--dim);font-size:10px;letter-spacing:1px;border-top:1px dashed var(--line)}
+/* Zoom d'image (lightbox) */
+#viewer img.illus{cursor:zoom-in}
+#lb{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.94);display:none;touch-action:none;overflow:hidden}
+#lb.show{display:block}
+#lb img{position:absolute;left:50%;top:50%;max-width:96vw;max-height:86vh;transform-origin:center;user-select:none;-webkit-user-drag:none;border:1px solid var(--cyan);box-shadow:0 0 30px rgba(0,229,255,.3);cursor:grab;background:#000}
+#lb .lbbar{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2}
+#lb .lbbar button{background:#000;border:1px solid var(--cyan);color:var(--cyan);width:44px;height:44px;font-size:20px;line-height:1}
+#lb .lbbar button:active{background:var(--cyan);color:#000}
+#lb .lbhint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:var(--dim);font-size:11px;letter-spacing:1px;pointer-events:none;transition:opacity .4s}
 .ftool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;max-width:900px}
 #fsearch{flex:1;min-width:180px;background:#000;border:1px solid var(--cyan);color:var(--green);padding:9px 10px;font-family:inherit;font-size:13px;outline:none}
 #fsearch:focus{box-shadow:0 0 10px var(--cyan)}
@@ -206,6 +215,17 @@ main{flex:1;min-height:0;position:relative}
 </div></div>
 
 <div id="lockdown"><h1>⚠ LOCKDOWN ⚠</h1><p id="lockT">TRACE COMPLÈTE — IC NOIRE DÉPLOYÉE</p><button id="gmReset">[MJ] Réinitialiser</button></div>
+
+<div id="lb" aria-hidden="true">
+  <div class="lbbar">
+    <button type="button" id="lbIn" aria-label="Zoom avant">+</button>
+    <button type="button" id="lbOut" aria-label="Zoom arrière">−</button>
+    <button type="button" id="lbReset" aria-label="Taille réelle">⟲</button>
+    <button type="button" id="lbClose" aria-label="Fermer">✕</button>
+  </div>
+  <img id="lbImg" alt="">
+  <div class="lbhint" id="lbHint">PINCEZ OU DOUBLE-TAP POUR ZOOMER · GLISSEZ POUR DÉPLACER</div>
+</div>
 
 <div id="start">
   <h1>JACKPOINT v5.78</h1>
@@ -769,6 +789,68 @@ cmdEl.addEventListener("keydown",e=>{
   else if(e.key==="ArrowDown"){hi=Math.min(hist.length,hi+1);cmdEl.value=hist[hi]||"";e.preventDefault()}
 });
 document.getElementById("cli").addEventListener("click",()=>cmdEl.focus());
+
+/* ---------- Zoom d'image (pincer, molette, double-tap, glisser) ---------- */
+const lb=document.getElementById("lb"),lbImg=document.getElementById("lbImg"),lbHint=document.getElementById("lbHint");
+const Z={s:1,x:0,y:0},ptrs=new Map();let pinch=null,drag=null,lastTap=0,moved=false;
+function zApply(){
+  /* l'image ne peut pas sortir de l'écran quand elle est zoomée */
+  const w=lbImg.offsetWidth*Z.s,h=lbImg.offsetHeight*Z.s;
+  const mx=Math.max(0,(w-innerWidth)/2),my=Math.max(0,(h-innerHeight)/2);
+  Z.x=Math.min(mx,Math.max(-mx,Z.x));Z.y=Math.min(my,Math.max(-my,Z.y));
+  if(Z.s<=1.001){Z.s=1;Z.x=0;Z.y=0}
+  lbImg.style.transform=`translate(calc(-50% + ${Z.x}px),calc(-50% + ${Z.y}px)) scale(${Z.s})`;
+  lbImg.style.cursor=Z.s>1?"grab":"zoom-in";
+}
+function zoomAt(px,py,r){  /* zoome autour du point (px,py) */
+  const s2=Math.min(6,Math.max(1,Z.s*r));r=s2/Z.s;
+  const dx=px-innerWidth/2,dy=py-innerHeight/2;
+  Z.x=dx-r*(dx-Z.x);Z.y=dy-r*(dy-Z.y);Z.s=s2;zApply();lbHint.style.opacity=0;
+}
+function lbOpen(src,alt){
+  Z.s=1;Z.x=0;Z.y=0;ptrs.clear();pinch=drag=null;
+  lbImg.src=src;lbImg.alt=alt||"";lbHint.style.opacity=1;
+  lb.classList.add("show");lb.setAttribute("aria-hidden","false");zApply();
+}
+function lbClose(){lb.classList.remove("show");lb.setAttribute("aria-hidden","true");ptrs.clear();pinch=drag=null}
+document.addEventListener("click",e=>{const i=e.target.closest&&e.target.closest("#viewer img.illus");if(i){sfxClick();lbOpen(i.currentSrc||i.src,i.alt)}});
+document.getElementById("lbClose").onclick=lbClose;
+document.getElementById("lbIn").onclick=()=>zoomAt(innerWidth/2,innerHeight/2,1.5);
+document.getElementById("lbOut").onclick=()=>zoomAt(innerWidth/2,innerHeight/2,1/1.5);
+document.getElementById("lbReset").onclick=()=>{Z.s=1;zApply()};
+document.addEventListener("keydown",e=>{if(!lb.classList.contains("show"))return;
+  if(e.key==="Escape")lbClose();else if(e.key==="+"||e.key==="=")zoomAt(innerWidth/2,innerHeight/2,1.5);else if(e.key==="-")zoomAt(innerWidth/2,innerHeight/2,1/1.5);else if(e.key==="0"){Z.s=1;zApply()}});
+lb.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,e.deltaY<0?1.2:1/1.2)},{passive:false});
+lb.addEventListener("pointerdown",e=>{
+  if(e.target.closest(".lbbar"))return;
+  if(e.isPrimary){ptrs.clear();pinch=null}  /* nouveau geste : on oublie les doigts fantômes */
+  lb.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
+  if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1};drag=null}
+  else if(ptrs.size===1)drag={x:e.clientX,y:e.clientY};
+});
+lb.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const p=ptrs.get(e.pointerId),ox=p.x,oy=p.y;p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===2&&pinch){
+    const[a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+    zoomAt((a.x+b.x)/2,(a.y+b.y)/2,d/pinch.d);pinch.d=d;moved=true;
+  }else if(drag&&Z.s>1){
+    Z.x+=e.clientX-ox;Z.y+=e.clientY-oy;zApply();moved=true;
+  }else if(Math.hypot(e.clientX-drag?.x,e.clientY-drag?.y)>8)moved=true;
+});
+function lbUp(e){
+  if(!ptrs.has(e.pointerId))return;
+  const wasSingle=ptrs.size===1;ptrs.delete(e.pointerId);
+  if(ptrs.size<2)pinch=null;
+  if(ptrs.size===1){const[q]=[...ptrs.values()];drag={x:q.x,y:q.y}}else if(!ptrs.size)drag=null;
+  if(wasSingle&&!moved&&e.type==="pointerup"){
+    const now=Date.now();
+    if(now-lastTap<320){lastTap=0;Z.s>1?(Z.s=1,zApply()):zoomAt(e.clientX,e.clientY,2.5)}
+    else{lastTap=now;if(e.target===lb&&Z.s===1)setTimeout(()=>{if(lastTap===now)lbClose()},330)}  /* tap sur le fond = fermer */
+  }
+}
+lb.addEventListener("pointerup",lbUp);lb.addEventListener("pointercancel",lbUp);
+lbImg.addEventListener("dragstart",e=>e.preventDefault());
 
 /* ---------- Init ---------- */
 function backToList(){document.getElementById("ar").classList.remove("reading")}
