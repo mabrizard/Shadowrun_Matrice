@@ -55,7 +55,7 @@ main{flex:1;min-height:0;position:relative}
 .card p{font-size:11px;color:var(--dim)}
 .card .path{color:var(--cyan);font-size:10px}
 .lvl{position:absolute;top:8px;right:8px;font-size:10px;padding:1px 6px;border:1px solid}
-.lvl.l0{color:var(--green)} .lvl.l1{color:var(--cyan)} .lvl.l2{color:var(--amber)} .lvl.l3{color:var(--red)}
+.lvl.l0{color:var(--green)} .lvl.l1{color:var(--cyan)} .lvl.l2{color:var(--amber)} .lvl.l3{color:var(--red)} .lvl.l4{color:#ff4df2}
 #viewer{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel);overflow:auto;padding:22px 26px}
 #viewer h2{color:var(--cyan);font-size:20px;letter-spacing:1px;margin-bottom:4px;text-shadow:0 0 8px rgba(0,229,255,.6)}
 #viewer h3{color:var(--amber);margin:18px 0 6px;font-size:14px;letter-spacing:1px}
@@ -190,8 +190,8 @@ const IMAGES = {
 };
 /* ========================================================================================= */
 
-const CODES = {1:"MARSHALL-2078", 2:"JANUS-7000", 3:"GHOST-DENVER"};
-const LEVEL_NAMES = {0:"PUBLIC",1:"NIVEAU 1",2:"NIVEAU 2",3:"FICHIER OMBRE"};
+const CODES = {2:"JANUS-7000", 3:"GHOST-DENVER", 4:"MARSHALL-2078"};
+const LEVEL_NAMES = {0:"PUBLIC",2:"NIVEAU 2",3:"FICHIER OMBRE",4:"NIVEAU 4"};
 
 const FILES = [
  {id:"geo", dir:"/root/PROJECT_BOREALIS", name:"geologie_rainier.txt", level:0,
@@ -243,10 +243,9 @@ Flux public, non vérifié. Toute corrélation avec des opérations internes est
 
 ## Consigne
 Les équipes de nuit ne doivent pas rester seules sur le niveau -3. Rapporter toute perception sonore anormale au superviseur.`},
- {id:"marshall", dir:"/logs/medical", name:"marshall_notes.txt", level:1,
-  title:"Dossier médical — Dr Nuri Marshall", kw:["marshall","nuri","medical","migraine","demence","givre","murmures"],
-  summary:"Notes cliniques sur les équipes de forage.",
-  img:["marshall","labo"],
+ {id:"medpub", dir:"/logs/medical", name:"public_report.txt", level:0,
+  title:"Rapport médical — Chantier BOREALIS", kw:["marshall","nuri","medical","migraine","demence","givre","murmures","rapport"],
+  summary:"Service médical : migraines des équipes de forage, demande d'arrêt des travaux.",
   text:`## Dr Nuri Marshall — Notes cliniques confidentielles
 Service médical Aztechnology · Chantier BOREALIS
 
@@ -264,6 +263,39 @@ Aucun agent pathogène ou toxique détecté. Les analyses astrales internes ont 
 
 ## Note personnelle
 « Je demande l'arrêt des forages. Ma requête a été classée sans suite. »`},
+ {id:"marshall", dir:"/logs/medical", name:"marshall_classified.txt", level:4,
+  title:"Journal de recherche — Dr Nuri Marshall", kw:["marshall","nuri","cuves","cobayes","sujets","dni","magie du sang","hate","haine","horreur","voix","ruche","reine","orichalque","janus","secteur -3","sas"],
+  summary:"Journal confidentiel de la Direction scientifique BOREALIS / JANUS.",
+  img:["marshall","labo"],
+  text:`## JOURNAL DE RECHERCHE — DIRECTION SCIENTIFIQUE BOREALIS / JANUS
+Dr Nuri Marshall · Accès : Direction uniquement · Copie interdite
+
+## ENTRÉE 1 — 2078-01-14 · 09:12
+Phase d'asservissement lancée sur le Secteur -3. Sujets #042 à #089 (48 sujets, SINless enlevés dans les Barrens de Redmond) transférés en cuves de bio-confinement. Aucune réclamation à prévoir.
+Protocole : implant DNI, puce de bridage et rituel de Magie du Sang d'Aztlan, afin de lier chaque hôte à un Esprit Insecte larvaire. Les rituels sont conduits par l'équipe du Sang ; je me contente de calibrer.
+- Puces de bridage : réponse nominale sur 48 sujets sur 48
+- Signal de commande unique, émis depuis le serveur central BOREALIS-9
+- Hôtes viables à J+6 : 34 sur 48, perte jugée acceptable
+La docilité des hôtes est remarquable. La Direction veut une armée d'élite obéissante ; je suis en train de la lui fournir.
+
+## ENTRÉE 2 — 2078-03-02 · 22:40 · COTE -1 800 m
+La foreuse a percuté le Pilier d'Orichalque. Structure confirmée, gravures d'origine non humaine, lisibles depuis le puits.
+Surcharge magique sur les cuves du Secteur -3 dès l'impact : trois cuves en dépassement.
+- Bio-moniteurs : ondes delta incohérentes sur 31 sujets, mais synchrones entre elles, ce qui est impossible sans lien
+- Parasites auditifs dans les connexions AR/DNI de l'équipe médicale ; les filtres sont inefficaces
+- Migraines chez les techniciens de forage : le rapport médical public reste en circulation, il sert de couverture
+Hypothèse de travail : résonance entre la matrice d'Orichalque et les rituels de sang. La demande d'arrêt contenue dans le rapport public est une formalité. Les forages continuent.
+
+## ENTRÉE 3 — 2078-03-19 · 03:07 · RUPTURE DU PROTOCOLE JANUS
+Les puces d'asservissement sautent une à une. Depuis 02:40, 29 des 34 hôtes ne répondent plus au serveur central. Les cuves n'obéissent plus à aucune commande d'Aztechnology.
+Je n'entends plus le signal central. J'entends autre chose, directement dans mon implant oculaire et mon DNI : douze voix grincantes, simultanées. Elles ne se contredisent jamais.
+La Reine ne pond plus des soldats. Elle pond des récepteurs. Ce n'est plus notre armée, c'est une antenne, et ce qui écoute au bout s'appelle Hate.
+- Sas de bio-confinement du Secteur -3 : ouverture automatique si l'alimentation chute
+- Canaux DNI de toute l'équipe compromis : NE PAS reconnecter les implants
+- Service de sécurité non informé
+## NOTE PERSONNELLE
+« Elles veulent que je déverrouille le secteur -3. Elles sont patientes. La Haine est pure. Je ne suis pas malade. Je ne suis pas malade. Je ne suis pas ma »
+[ENREGISTREMENT INTERROMPU — SAISIE MANUELLE DÉTECTÉE SUR LE CODE D'AUTORISATION DU SECTEUR -3]`},
  {id:"janus", dir:"/classified/JANUS", name:"projet_janus.txt", level:2,
   title:"PROJET JANUS — Ultra-confidentiel", kw:["janus","orichalque","magie du sang","ruche","drain","quatrieme monde","matrice de sorts"],
   summary:"Le véritable but du forage BOREALIS.",
@@ -374,7 +406,7 @@ function updateGauges(){
   const tb=document.getElementById("traceBar");
   tb.style.width=t+"%";
   tb.style.background=t<40?"var(--green)":t<75?"var(--amber)":"var(--red)";
-  const n=[1,2,3].filter(l=>state.unlocked[l]).length;
+  const n=[2,3,4].filter(l=>state.unlocked[l]).length;
   document.getElementById("bfV").textContent=n+"/3";
   document.getElementById("bfBar").style.width=(n/3*100)+"%";
 }
@@ -513,7 +545,7 @@ function run(line){
     case "clear":out.innerHTML="";break;
     case "status":
       print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
-      [1,2,3].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
+      [2,3,4].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
     case "tree":
       print("/");DIRS.forEach(d=>{print("├── "+d);FILES.filter(f=>f.dir===d).forEach(f=>print(`│    └── ${f.name} ${state.unlocked[f.level]?"":"[🔒]"}`))});break;
     case "ls":{
