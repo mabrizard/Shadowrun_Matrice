@@ -179,8 +179,9 @@ main{flex:1;min-height:0;position:relative}
 /* Placez les images dans le même dossier que index.html (ou mettez une URL complète).
    Si un fichier est introuvable, un placeholder s'affiche automatiquement. */
 const IMAGES = {
-  logo: "",                      // Logo Aztechnology / Projet Borealis (en-tête)
-  site: "",                      // Visuel du chantier Borealis
+  logo: "logo_borealis.jpg",     // Logo Aztechnology / Projet Borealis (en-tête)
+  site: "chantier_borealis.jpg", // Visuel du chantier Borealis (rapport géologique)
+  obelisque: "obelisque_janus.jpg", // Obélisque d'Orichalque — dossier JANUS
   marshall: "marshall_badge.jpg",// Badge / carte d'accès du Dr Marshall
   ruche: "dossier_ruche.jpg",    // La Ruche — dossier JANUS
   aurora: "aurora_logo.jpg",     // Logo Aurora Crest — traceur financier
@@ -266,7 +267,7 @@ Aucun agent pathogène ou toxique détecté. Les analyses astrales internes ont 
  {id:"janus", dir:"/classified/JANUS", name:"projet_janus.txt", level:2,
   title:"PROJET JANUS — Ultra-confidentiel", kw:["janus","orichalque","magie du sang","ruche","drain","quatrieme monde","matrice de sorts"],
   summary:"Le véritable but du forage BOREALIS.",
-  img:"ruche",
+  img:["obelisque","ruche"],
   text:`## PROJET JANUS — ULTRA-CONFIDENTIEL AZTECHNOLOGY
 Accès restreint : Conseil d'administration & Direction BOREALIS
 
