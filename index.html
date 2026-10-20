@@ -693,11 +693,12 @@ function resetAll(){
   updateGauges();renderList();
 }
 /* Liens directs : #f=marshall … #f=feed (forum) · #reset (remise à zéro) */
+function linkStr(){return location.search+location.hash}  /* accepte ?f=feed ET #f=feed */
 function handleHash(){
-  if(/reset/i.test(location.hash)){
-    resetAll();history.replaceState(null,"",location.pathname+location.search);toast("◈ CONSOLE RÉINITIALISÉE");return;
+  if(/reset/i.test(linkStr())){
+    resetAll();try{history.replaceState(null,"",location.pathname)}catch(e){}toast("◈ CONSOLE RÉINITIALISÉE");return;
   }
-  const m=location.hash.match(/f=([a-z]+)/i);if(!m)return;
+  const m=linkStr().match(/f=([a-z]+)/i);if(!m)return;
   if(m[1].toLowerCase()==="feed"){document.querySelector('.tab[data-mode="feed"]').click();return}
   const f=FILES.find(x=>x.id===m[1].toLowerCase());if(!f)return;
   document.querySelector('.tab[data-mode="ar"]').click();
@@ -712,7 +713,7 @@ window.addEventListener("hashchange",()=>{if(started)handleHash()});
 const sndBtn=document.getElementById("snd");
 sndBtn.onclick=()=>{setMuted(!muted);sndBtn.textContent=muted?"♪ OFF":"♪ ON"};
 banner();renderList();renderFeed();updateGauges();setPrompt();
-if(/reset/i.test(location.hash))handleHash();
+if(/reset/i.test(linkStr()))handleHash();
 </script>
 </body>
 </html>
