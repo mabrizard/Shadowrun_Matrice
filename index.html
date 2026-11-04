@@ -212,6 +212,11 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
 #dump.show{display:flex}#dump h1{letter-spacing:4px;font-size:34px;margin:0}
 #dump button{background:transparent;border:1px solid #fff;color:#fff;padding:10px 20px;font:inherit;letter-spacing:2px;cursor:pointer}
 .grp{display:flex;justify-content:space-between;width:100%;background:transparent;border:1px solid var(--line);border-left:3px solid var(--cyan);color:var(--cyan);padding:9px 10px;margin:8px 0 4px;font:inherit;letter-spacing:1px;cursor:pointer;text-align:left}.grp small{color:var(--dim)}.grp.open{background:rgba(0,229,255,.06)}
+#sysbar{display:none;align-items:center;justify-content:space-between;gap:8px;padding:5px 14px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.35)}
+#sysbar img{height:24px;max-width:36%;object-fit:contain}
+#sysbar .sep{flex:1;border-top:1px dashed var(--line)}
+#bgglobe{position:fixed;inset:0;z-index:-1;background:center/min(90vw,90vh) no-repeat;opacity:.09;pointer-events:none}
+#dump img,#deck img.ic{height:46px;width:46px;object-fit:contain;vertical-align:middle;margin-right:6px}
 </style>
 </head>
 <body>
@@ -234,6 +239,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
       <button class="sndbtn" id="jackOut" style="display:none"></button>
     </div>
   </header>
+  <div id="sysbar" style="display:none"></div>
   <div id="deck"></div>
   <main>
     <section id="ar" class="view active">
@@ -273,7 +279,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
   <div id="msg"></div>
 </div></div>
 
-<div id="dump"><h1>DUMPSHOCK</h1><p>ÉJECTION D'URGENCE SOUS GLACE NOIRE<br>MJ : test de Résistance au dumpshock</p><button id="dumpOk">[ REPRENDRE ]</button></div>
+<div id="dump"><div id="dumpIc"></div><h1>DUMPSHOCK</h1><p>ÉJECTION D'URGENCE SOUS GLACE NOIRE<br>MJ : test de Résistance au dumpshock</p><button id="dumpOk">[ REPRENDRE ]</button></div>
 <div id="lockdown"><h1 id="lockH"></h1><p id="lockT"></p><button id="gmReset">[MJ] Réinitialiser</button></div>
 
 <div id="lb" aria-hidden="true">
@@ -293,7 +299,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
   <p style="color:var(--dim);font-size:11px">Activez le son pour une immersion complète</p>
 </div>
 
-<script src="content.js?v=bfad6d24"></script>
+<script src="content.js?v=31c024f6"></script>
 <script>
 /* Moteur générique : tout le contenu de campagne vient de content.js (CONFIG, IMAGES, CODES, FILES, THREADS…) */
 /* ---------- JackPoint / Shadowtalk (fluff public) ---------- */
@@ -358,6 +364,11 @@ function applyConfig(){
   if(CONFIG.tabCLI)document.querySelector('.tab[data-mode="cli"]').textContent=CONFIG.tabCLI;
   if(CONFIG.topology)$("vsw").style.display="flex";
   if(CONFIG.deck)$("deckBtn").style.display="";
+  if(CONFIG.headerLogos){  /* bandeau « logo système — nœud — logo serveur » */
+    const sb=$("sysbar");sb.style.display="flex";
+    sb.innerHTML=CONFIG.headerLogos.map(k=>`<img src="${imgSrc(k)}" alt="" onerror="this.style.display='none'">`).join('<span class="sep"></span>');
+  }
+  if(CONFIG.bgImage){const g=document.createElement("div");g.id="bgglobe";g.style.backgroundImage=`url("${imgSrc(CONFIG.bgImage)}")`;document.body.appendChild(g)}
   if(CONFIG.jackOut){$("jackOut").style.display="";$("jackOut").textContent=CONFIG.jackOut}
 }
 applyConfig();
@@ -476,7 +487,9 @@ function updateGauges(){
   document.getElementById("bfV").textContent=n+"/"+LVS.length;
   document.getElementById("bfBar").style.width=(n/LVS.length*100)+"%";
   if(CONFIG.deck&&deckState.open)renderDeck();
-  document.body.classList.toggle("deep",!!(CONFIG.deepLevel&&state.unlocked[CONFIG.deepLevel]));
+  const dp=!!(CONFIG.deepLevel&&state.unlocked[CONFIG.deepLevel]);
+  document.body.classList.toggle("deep",dp);
+  if(IMAGES.logoDeep)logoEl.src=imgSrc(dp?"logoDeep":"logo");
 }
 function flash(cls){document.body.classList.remove("flashG","flashR");void document.body.offsetWidth;document.body.classList.add(cls);}
 
@@ -575,7 +588,7 @@ function renderDeck(){
   if(!deckState.on)deckState.on=D.programs.filter(p=>p.on).map(p=>p.n);
   const used=D.programs.filter(p=>deckState.on.includes(p.n)).reduce((a,p)=>a+p.mp,0);
   const t=state.trace,al=CONFIG.alert?([...CONFIG.alert].reverse().find(x=>t>=x.from)||CONFIG.alert[0]).label:"";
-  const noire=emergency(),bpm=Math.round(72+t*.55+(noire?15:0));
+  const noire=emergency(),icn=IMAGES.blackIC&&noire?`<img class="ic" src="${imgSrc("blackIC")}" alt="">`:"",bpm=Math.round(72+t*.55+(noire?15:0));
   const integ=noire?(state.locked?40:70):100;
   const el=document.getElementById("deck");
   el.innerHTML=`<div class="dh">[ ${esc(D.name)} ] // MONITEUR DE CONNEXION FILAIRE — JACK-IN ACTIF</div>
@@ -588,7 +601,7 @@ function renderDeck(){
   <h4>SÉCURITÉ &amp; GLACE</h4>
   <div>NIVEAU D'ALERTE : <b>${esc(al)}</b> · COMPTEUR : ${t} / 100 (verrouillage à 100)</div>
   <div>├ GLACE BLANCHE :: Sonde v1.2 ......... <span class="${t>=25?"warn":""}">${t>=25?"ACTIVE — scan":"ACTIVE — en attente"}</span></div>
-  <div>└ GLACE NOIRE :: Psychotrope v4.0 .... <span class="${noire?"bad":""}">${noire?"ACTIVE":"INACTIVE — verrouillée"}</span></div>
+  <div>└ GLACE NOIRE :: ${icn}Psychotrope v4.0 .... <span class="${noire?"bad":""}">${noire?"ACTIVE":"INACTIVE — verrouillée"}</span></div>
   <h4>PROGRAMMES (touchez pour charger / décharger)</h4>`+
   D.programs.map(p=>{const on=deckState.on.includes(p.n);return `<button class="pg ${on?"on":""}" data-p="${esc(p.n)}">${on?"■":"□"} ${esc(p.n)} <small>${p.mp} MP · ${esc(p.note)}</small></button>`}).join("");
   el.querySelectorAll(".pg").forEach(b=>b.onclick=()=>{
@@ -893,7 +906,7 @@ document.getElementById("startBtn").onclick=()=>{
 function doJackOut(){
   if(!started)return;
   if(CONFIG.deck&&emergency()){  /* éjection sous GLACE noire : dumpshock */
-    sfxJackOut();sfxGlitch();document.getElementById("dump").classList.add("show");return;
+    sfxJackOut();sfxGlitch();document.getElementById("dumpIc").innerHTML=IMAGES.blackIC?`<img src="${imgSrc("blackIC")}" alt="">`:"";document.getElementById("dump").classList.add("show");return;
   }
   sfxJackOut();document.body.classList.add("crtoff");
   setTimeout(()=>{document.body.classList.remove("crtoff");started=false;document.getElementById("start").style.display="flex"},560);
