@@ -158,6 +158,40 @@ main{flex:1;min-height:0;position:relative}
   #cli{padding:8px 10px}
   #out{font-size:12px}
 }
+
+/* ===== Thèmes d'époque (activés par CONFIG.theme / themeClass / topology / looks / deepLevel) ===== */
+body.crt{text-shadow:0 0 3px currentColor}
+body.crt::after{background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.34) 3px),radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.6) 100%)}
+body.crt .card,body.crt .thread,body.crt #viewer,body.crt .box{border-radius:0}
+body.deep{--bg:#080904;--panel:#0d0e06;--line:#3b3d12;--green:#b6ff3a;--cyan:#d8c64a;--amber:#ff7a1a;--text:#dbe3a2;--dim:#8d9350}
+body.deep::after{animation:flick 2.2s infinite}
+.glitchin{animation:glitchin .9s steps(7)}
+@keyframes glitchin{0%{filter:none}15%{filter:hue-rotate(90deg) contrast(1.8);transform:translateX(-5px)}35%{filter:invert(1)}55%{transform:translateX(6px) skewX(3deg)}80%{filter:hue-rotate(-60deg)}100%{filter:none;transform:none}}
+.lookbar{font-size:11px;letter-spacing:2px;margin:0 0 14px;padding:7px 10px;border:1px solid currentColor;text-align:center}
+#viewer.look-facade{background:#f3eee2;color:#3d3a33;border-color:#c9a85a;text-shadow:none}
+#viewer.look-facade h2{color:#8f6b1e;text-shadow:none}
+#viewer.look-facade h3{color:#a8812f}
+#viewer.look-facade p,#viewer.look-facade li{color:#3d3a33}
+#viewer.look-facade .meta{color:#857d6b;border-color:#d8cdb0}
+#viewer.look-facade .lookbar{color:#8f6b1e}
+#viewer.look-facade .backbtn{color:#8f6b1e;border-color:#8f6b1e}
+#viewer.look-facade .stamp{color:#a33;border-color:#a33}
+#viewer.look-deep{background:#0b0c05;border-color:#b6ff3a;box-shadow:0 0 18px rgba(182,255,58,.25);animation:flick 3s infinite}
+#viewer.look-deep h2{color:#b6ff3a;text-shadow:0 0 10px #b6ff3a}
+#viewer.look-deep h3{color:#ff7a1a}
+#viewer.look-deep p,#viewer.look-deep li{color:#dbe3a2}
+#viewer.look-deep .lookbar{color:#b6ff3a}
+.vsw{display:none;gap:6px}
+.vsw button{flex:1;background:transparent;border:1px solid var(--line);color:var(--dim);padding:7px 0;font-size:11px;letter-spacing:1px}
+.vsw button.on{color:var(--bg);background:var(--cyan);border-color:var(--cyan)}
+#topo{overflow:auto;border:1px solid var(--line);background:rgba(0,0,0,.35);padding:8px}
+.topo-svg .tn{fill:rgba(0,0,0,.5);stroke:var(--green);stroke-width:1.3;filter:drop-shadow(0 0 3px var(--green))}
+.topo-svg .tn.root{stroke:var(--cyan);filter:drop-shadow(0 0 3px var(--cyan))}
+.topo-svg .tn.off{stroke:var(--dim);stroke-dasharray:3 2;filter:none}
+.topo-svg .tn.file{cursor:pointer}
+.topo-svg .lk{fill:none;stroke:var(--line);stroke-width:1.2}
+.topo-svg text{font:9px "Courier New",monospace;text-anchor:middle;fill:var(--cyan);pointer-events:none}
+.topo-svg text.dim{fill:var(--dim)}
 </style>
 </head>
 <body>
@@ -176,6 +210,7 @@ main{flex:1;min-height:0;position:relative}
       <button class="tab" data-mode="cli">▮ TERMINAL</button>
       <button class="tab" data-mode="feed" id="feedTab">☰ FORUM</button>
       <button class="sndbtn" id="snd" title="Son">♪ ON</button>
+      <button class="sndbtn" id="jackOut" style="display:none"></button>
     </div>
   </header>
   <main>
@@ -183,7 +218,9 @@ main{flex:1;min-height:0;position:relative}
       <aside id="side">
         <input id="search" placeholder="" autocomplete="off">
         <div class="chips" id="chips"></div>
+        <div class="vsw" id="vsw"><button type="button" data-v="list" class="on">LISTE</button><button type="button" data-v="topo">TOPOLOGIE</button></div>
         <div id="list"></div>
+        <div id="topo" style="display:none"></div>
       </aside>
       <article id="viewer"><div class="empty">// AUCUN FICHIER SÉLECTIONNÉ //<br><br>Sélectionnez un fichier dans l'arborescence.</div></article>
     </section>
@@ -291,9 +328,17 @@ function applyConfig(){
   const sl=$("startLines");sl.innerHTML="";
   CONFIG.startLines.forEach((t,i)=>{const e=document.createElement(i?"p":"h1");e.textContent=t;sl.appendChild(e)});
   $("startBtn").textContent=CONFIG.startButton;
+  /* thème d'époque (facultatif) */
+  if(CONFIG.theme)Object.entries(CONFIG.theme).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  if(CONFIG.themeClass)document.body.classList.add(...CONFIG.themeClass.split(" "));
+  if(CONFIG.tabAR)document.querySelector('.tab[data-mode="ar"]').textContent=CONFIG.tabAR;
+  if(CONFIG.tabCLI)document.querySelector('.tab[data-mode="cli"]').textContent=CONFIG.tabCLI;
+  if(CONFIG.topology)$("vsw").style.display="flex";
+  if(CONFIG.jackOut){$("jackOut").style.display="";$("jackOut").textContent=CONFIG.jackOut}
 }
 applyConfig();
 
+const LVS=Object.keys(CODES).map(Number);  /* niveaux verrouillés de cette campagne */
 const state = {unlocked:{0:true}, trace:0, cwd:"/", selected:null, pending:null, locked:false};
 try{const s=JSON.parse(localStorage.getItem(CONFIG.storageKey)||"null"); if(s){state.unlocked=Object.assign({0:true},s.unlocked);}}catch(e){}
 function save(){try{localStorage.setItem(CONFIG.storageKey,JSON.stringify({unlocked:state.unlocked}))}catch(e){}}
@@ -357,17 +402,46 @@ function sfxSiren(){
 const sfxOk=()=>{beep(520,.12,"sine",.08);beep(780,.12,"sine",.08,.12);beep(1040,.25,"sine",.08,.24)};
 const sfxKo=()=>{beep(180,.25,"sawtooth",.08);beep(140,.25,"sawtooth",.08,.28);beep(180,.25,"sawtooth",.08,.56)};
 const sfxClick=()=>beep(900,.04,"square",.03);
+/* Connexion par modem (époque câblée) : numérotation, tonalité, bruit de négociation */
+function sfxModem(){
+  try{
+    ensureAudio();
+    [[697,1209],[770,1336],[852,1477],[697,1336],[941,1209],[770,1477],[852,1209]].forEach((p,i)=>{beep(p[0],.09,"sine",.04,i*.13);beep(p[1],.09,"sine",.04,i*.13)});
+    beep(2100,.55,"sine",.05,1.05);beep(1300,.2,"sine",.05,1.65);beep(2250,.2,"sine",.05,1.9);
+    const len=Math.floor(actx.sampleRate*1.4),buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(i%3000<1500?1:.35);
+    const src=actx.createBufferSource(),bp=actx.createBiquadFilter(),g=actx.createGain();
+    src.buffer=buf;bp.type="bandpass";bp.frequency.value=1700;bp.Q.value=1.6;g.gain.value=.06;
+    src.connect(bp);bp.connect(g);g.connect(master);src.start(actx.currentTime+2.0);
+  }catch(e){}
+}
+const sfxJackOut=()=>{beep(900,.1,"sine",.06);beep(600,.12,"sine",.06,.1);beep(350,.2,"sine",.06,.22)};
+function sfxGlitch(){  /* bascule vers les nœuds secrets */
+  try{
+    ensureAudio();
+    const len=Math.floor(actx.sampleRate*.5),buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+    const s=actx.createBufferSource(),g=actx.createGain();s.buffer=buf;g.gain.value=.12;s.connect(g);g.connect(master);s.start();
+    beep(90,.5,"sawtooth",.07);beep(60,.6,"sawtooth",.06,.15);
+  }catch(e){}
+}
 
 /* ---------- Gauges ---------- */
 function updateGauges(){
   const t=state.trace;
-  document.getElementById("traceV").textContent=t+"%";
   const tb=document.getElementById("traceBar");
   tb.style.width=t+"%";
-  tb.style.background=t<40?"var(--green)":t<75?"var(--amber)":"var(--red)";
-  const n=[1,2,3,4].filter(l=>state.unlocked[l]).length;
-  document.getElementById("bfV").textContent=n+"/4";
-  document.getElementById("bfBar").style.width=(n/4*100)+"%";
+  if(CONFIG.alert){  /* époque câblée : code couleur de sécurité plutôt que pourcentage */
+    const a=[...CONFIG.alert].reverse().find(x=>t>=x.from)||CONFIG.alert[0];
+    document.getElementById("traceV").textContent=a.label;tb.style.background=a.color;
+  }else{
+    document.getElementById("traceV").textContent=t+"%";
+    tb.style.background=t<40?"var(--green)":t<75?"var(--amber)":"var(--red)";
+  }
+  const n=LVS.filter(l=>state.unlocked[l]).length;
+  document.getElementById("bfV").textContent=n+"/"+LVS.length;
+  document.getElementById("bfBar").style.width=(n/LVS.length*100)+"%";
+  document.body.classList.toggle("deep",!!(CONFIG.deepLevel&&state.unlocked[CONFIG.deepLevel]));
 }
 function flash(cls){document.body.classList.remove("flashG","flashR");void document.body.offsetWidth;document.body.classList.add(cls);}
 
@@ -376,7 +450,11 @@ function tryCode(raw){
   const c=(raw||"").trim().toUpperCase();
   const lvl=Object.keys(CODES).find(k=>CODES[k]===c);
   if(lvl){
+    const was=!!state.unlocked[lvl];
     state.unlocked[lvl]=true;save();updateGauges();sfxOk();flash("flashG");
+    if(CONFIG.deepLevel&&+lvl===CONFIG.deepLevel&&!was){
+      sfxGlitch();document.body.classList.add("glitchin");setTimeout(()=>document.body.classList.remove("glitchin"),900);
+    }
     return {ok:true,level:+lvl};
   }
   state.trace=Math.min(100,state.trace+25);updateGauges();sfxKo();flash("flashR");
@@ -448,6 +526,43 @@ function matches(f,q){
   q=q.trim().toLowerCase();if(!q)return true;
   return [f.title,f.name,f.dir,f.summary,...f.kw].join(" ").toLowerCase().includes(q);
 }
+let viewMode="list";
+function setView(v){
+  viewMode=v;
+  document.getElementById("list").style.display=v==="list"?"":"none";
+  document.getElementById("topo").style.display=v==="topo"?"":"none";
+  document.querySelectorAll("#vsw button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  if(v==="topo")renderTopo();
+}
+document.querySelectorAll("#vsw button").forEach(b=>b.onclick=()=>{sfxClick();setView(b.dataset.v)});
+/* Topologie : racine → nœuds (dossiers) → fichiers, tracés en fil de fer. Pointillés = verrouillé. */
+function renderTopo(){
+  const rows=DIRS.map(d=>({d,fs:FILES.filter(f=>f.dir===d)})).filter(r=>r.fs.length);
+  const rowH=68,dx=104,maxF=Math.max(1,...rows.map(r=>r.fs.length));
+  const W=Math.max(330,dx+46+maxF*48),H=Math.max(130,rows.length*rowH+30);
+  const rx=24,ry=H/2;
+  let s=`<svg class="topo-svg" viewBox="0 0 ${W} ${H}" width="100%">`;
+  s+=`<rect class="tn root" x="${rx-15}" y="${ry-15}" width="30" height="30"/><text x="${rx}" y="${ry+3}">${esc(CONFIG.topoRoot||"ROOT")}</text>`;
+  rows.forEach((r,i)=>{
+    const y=34+i*rowH;
+    s+=`<path class="lk" d="M${rx+15},${ry} H64 V${y} H${dx-15}"/>`;
+    s+=`<rect class="tn" x="${dx-15}" y="${y-13}" width="30" height="26"/>`;
+    s+=`<text class="dim" x="${dx}" y="${y-19}">${esc(r.d.split("/").filter(Boolean).pop().slice(0,16))}</text>`;
+    r.fs.forEach((f,j)=>{
+      const fx=dx+48+j*48,unl=!!state.unlocked[f.level];
+      s+=`<path class="lk" d="M${j?fx-48+10:dx+15},${y} H${fx-10}"/>`;
+      s+=`<rect class="tn file ${unl?"on":"off"}" data-id="${esc(f.id)}" x="${fx-10}" y="${y-10}" width="20" height="20"/>`;
+      s+=`<text class="dim" x="${fx}" y="${y+24}">${esc(f.id.slice(0,8))}</text>`;
+      if(!unl)s+=`<text x="${fx}" y="${y+4}">×</text>`;
+    });
+  });
+  document.getElementById("topo").innerHTML=s+"</svg>";
+}
+document.getElementById("topo").addEventListener("click",e=>{
+  const el=e.target.closest("[data-id]");if(!el)return;
+  const f=FILES.find(x=>x.id===el.dataset.id);if(!f)return;
+  sfxClick();state.unlocked[f.level]?showFile(f):openModal(f);
+});
 function renderList(){
   const q=searchEl.value;listEl.innerHTML="";
   const res=FILES.filter(f=>matches(f,q));
@@ -459,11 +574,15 @@ function renderList(){
     d.onclick=()=>{sfxClick();unl?showFile(f):openModal(f)};
     listEl.appendChild(d);
   });
+  if(viewMode==="topo")renderTopo();
 }
 function showFile(f){
   state.selected=f.id;renderList();
   document.getElementById("ar").classList.add("reading");
-  viewer.innerHTML=`<button class="backbtn" onclick="backToList()">◂ RETOUR</button><h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${LEVEL_NAMES[f.level]} · HOST ${CONFIG.hostId}</div>`+
+  viewer.className=f.look?"look-"+f.look:"";
+  viewer.innerHTML=`<button class="backbtn" onclick="backToList()">◂ RETOUR</button>`+
+    (f.look&&CONFIG.looks&&CONFIG.looks[f.look]?`<div class="lookbar">${esc(CONFIG.looks[f.look])}</div>`:"")+
+    `<h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${LEVEL_NAMES[f.level]} · HOST ${CONFIG.hostId}</div>`+
     (f.level>=CONFIG.stampFrom?`<div class="stamp">${esc(CONFIG.stampText)}</div>`:'')+
     [].concat(f.img||[]).map(k=>`<img class="illus" src="${imgSrc(k)}" alt="${k}" onerror="this.onerror=null;this.src=placeholder('${k}')" style="clear:right">`).join("")+toHTML(f.text);
   viewer.scrollTop=0;
@@ -519,7 +638,7 @@ function run(line){
     case "clear":out.innerHTML="";break;
     case "status":
       print(`Trace : ${state.trace}%`,state.trace>=50?"warn":"");
-      [1,2,3,4].forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
+      LVS.forEach(l=>print(`  ${LEVEL_NAMES[l]} : ${state.unlocked[l]?"DÉVERROUILLÉ":"VERROUILLÉ"}`));break;
     case "tree":
       print("/");DIRS.forEach(d=>{print("├── "+d);FILES.filter(f=>f.dir===d).forEach(f=>print(`│    └── ${f.name} ${state.unlocked[f.level]?"":"[🔒]"}`))});break;
     case "ls":{
@@ -648,6 +767,7 @@ function resetAll(){
   state.unlocked={0:true};state.trace=0;state.locked=false;state.selected=null;state.pending=null;
   document.getElementById("lockdown").classList.remove("show");closeModal();
   document.getElementById("ar").classList.remove("reading");
+  viewer.className="";
   viewer.innerHTML='<div class="empty">// AUCUN FICHIER SÉLECTIONNÉ //<br><br>Sélectionnez un fichier dans l\'arborescence.</div>';
   updateGauges();renderList();
 }
@@ -666,7 +786,10 @@ function handleHash(){
 let started=false;
 document.getElementById("startBtn").onclick=()=>{
   started=true;document.getElementById("start").style.display="none";
-  startAudio();handleHash();
+  startAudio();if(CONFIG.startSound==="modem")sfxModem();handleHash();
+};
+document.getElementById("jackOut").onclick=()=>{
+  sfxJackOut();started=false;document.getElementById("start").style.display="flex";
 };
 window.addEventListener("hashchange",()=>{if(started)handleHash()});
 const sndBtn=document.getElementById("snd");
