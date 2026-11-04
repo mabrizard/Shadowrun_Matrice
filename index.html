@@ -196,6 +196,21 @@ body.deep::after{animation:flick 2.2s infinite}
 /* page claire (façade) : pas de lignes de balayage, elles gênent la lecture */
 body.pagelit::after{background:none;animation:none}
 #viewer.look-facade{text-shadow:none}
+/* Moniteur de cyberdeck (CONFIG.deck) */
+#deck{display:none;border-bottom:1px solid var(--line);background:rgba(0,0,0,.45);padding:10px 14px;font-size:12px;line-height:1.55}
+#deck.open{display:block}
+#deck .dh{color:var(--cyan);letter-spacing:1px;margin-bottom:6px;border-bottom:1px dashed var(--line);padding-bottom:5px}
+#deck .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#deck .k{color:var(--dim)} #deck .bl{letter-spacing:1px;color:var(--green)} #deck .bad{color:var(--red)} #deck .warn{color:var(--amber)}
+#deck h4{margin:8px 0 3px;color:var(--amber);font-size:11px;letter-spacing:2px}
+#deck .pg{display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:1px solid var(--line);color:var(--text);padding:6px 8px;margin:3px 0;font:inherit;text-align:left;cursor:pointer}
+#deck .pg.on{border-color:var(--green);color:var(--green)}
+#deck .pg small{margin-left:auto;color:var(--dim)}
+@keyframes crtoff{0%{transform:scale(1,1);filter:brightness(1)}60%{transform:scale(1,.02);filter:brightness(3)}100%{transform:scale(0,0);filter:brightness(0)}}
+body.crtoff #app{animation:crtoff .55s ease-in forwards}
+#dump{display:none;position:fixed;inset:0;z-index:99;background:rgba(120,0,0,.88);color:#fff;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;gap:14px}
+#dump.show{display:flex}#dump h1{letter-spacing:4px;font-size:34px;margin:0}
+#dump button{background:transparent;border:1px solid #fff;color:#fff;padding:10px 20px;font:inherit;letter-spacing:2px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -214,9 +229,11 @@ body.pagelit::after{background:none;animation:none}
       <button class="tab" data-mode="cli">▮ TERMINAL</button>
       <button class="tab" data-mode="feed" id="feedTab">☰ FORUM</button>
       <button class="sndbtn" id="snd" title="Son">♪ ON</button>
+      <button class="sndbtn" id="deckBtn" style="display:none">▣ DECK</button>
       <button class="sndbtn" id="jackOut" style="display:none"></button>
     </div>
   </header>
+  <div id="deck"></div>
   <main>
     <section id="ar" class="view active">
       <aside id="side">
@@ -255,6 +272,7 @@ body.pagelit::after{background:none;animation:none}
   <div id="msg"></div>
 </div></div>
 
+<div id="dump"><h1>DUMPSHOCK</h1><p>ÉJECTION D'URGENCE SOUS GLACE NOIRE<br>MJ : test de Résistance au dumpshock</p><button id="dumpOk">[ REPRENDRE ]</button></div>
 <div id="lockdown"><h1 id="lockH"></h1><p id="lockT"></p><button id="gmReset">[MJ] Réinitialiser</button></div>
 
 <div id="lb" aria-hidden="true">
@@ -338,6 +356,7 @@ function applyConfig(){
   if(CONFIG.tabAR)document.querySelector('.tab[data-mode="ar"]').textContent=CONFIG.tabAR;
   if(CONFIG.tabCLI)document.querySelector('.tab[data-mode="cli"]').textContent=CONFIG.tabCLI;
   if(CONFIG.topology)$("vsw").style.display="flex";
+  if(CONFIG.deck)$("deckBtn").style.display="";
   if(CONFIG.jackOut){$("jackOut").style.display="";$("jackOut").textContent=CONFIG.jackOut}
 }
 applyConfig();
@@ -420,7 +439,7 @@ function sfxModem(){
     src.connect(bp);bp.connect(g);g.connect(master);src.start(actx.currentTime+2.0);
   }catch(e){}
 }
-const sfxJackOut=()=>{beep(900,.1,"sine",.06);beep(600,.12,"sine",.06,.1);beep(350,.2,"sine",.06,.22)};
+const sfxJackOut=()=>{beep(900,.1,"sine",.06);beep(600,.12,"sine",.06,.1);beep(350,.2,"sine",.06,.22);beep(70,.25,"sawtooth",.09,.3);beep(2000,.5,"sine",.03,.45)};
 function sfxGlitch(){  /* bascule vers les nœuds secrets */
   try{
     ensureAudio();
@@ -446,6 +465,7 @@ function updateGauges(){
   const n=LVS.filter(l=>state.unlocked[l]).length;
   document.getElementById("bfV").textContent=n+"/"+LVS.length;
   document.getElementById("bfBar").style.width=(n/LVS.length*100)+"%";
+  if(CONFIG.deck&&deckState.open)renderDeck();
   document.body.classList.toggle("deep",!!(CONFIG.deepLevel&&state.unlocked[CONFIG.deepLevel]));
 }
 function flash(cls){document.body.classList.remove("flashG","flashR");void document.body.offsetWidth;document.body.classList.add(cls);}
@@ -531,6 +551,41 @@ function matches(f,q){
   q=q.trim().toLowerCase();if(!q)return true;
   return [f.title,f.name,f.dir,f.summary,...f.kw].join(" ").toLowerCase().includes(q);
 }
+/* ---------- Moniteur de cyberdeck (époque câblée) ---------- */
+const deckState={open:false,on:null};
+const bar=(v,m,n=12)=>{const f=Math.round(v/m*n);return "█".repeat(f)+"░".repeat(n-f)};
+const emergency=()=>state.locked||state.trace>=75;
+function renderDeck(){
+  const D=CONFIG.deck;if(!D)return;
+  if(!deckState.on)deckState.on=D.programs.filter(p=>p.on).map(p=>p.n);
+  const used=D.programs.filter(p=>deckState.on.includes(p.n)).reduce((a,p)=>a+p.mp,0);
+  const t=state.trace,al=CONFIG.alert?([...CONFIG.alert].reverse().find(x=>t>=x.from)||CONFIG.alert[0]).label:"";
+  const noire=emergency(),bpm=Math.round(72+t*.55+(noire?15:0));
+  const integ=noire?(state.locked?40:70):100;
+  const el=document.getElementById("deck");
+  el.innerHTML=`<div class="dh">[ ${esc(D.name)} ] // MONITEUR DE CONNEXION FILAIRE — JACK-IN ACTIF</div>
+  <div class="row"><span><span class="k">PORT</span> ${esc(D.port)}</span><span><span class="k">STATUT</span> CONNECTÉ (FIBRE)</span></div>
+  <div class="row"><span><span class="k">MODE</span> RV immersive</span><span><span class="k">LATENCE</span> &lt; 1 ms (câblé)</span></div>
+  <h4>RESSOURCES DU CYBERDECK</h4>
+  <div>RAM : <span class="bl ${used>D.ram*.9?"warn":""}">${bar(used,D.ram)}</span> ${used} / ${D.ram} MP</div>
+  <div>INTÉGRITÉ : <span class="bl ${integ<100?"bad":""}">${bar(integ,100)}</span> ${integ} %</div>
+  <div>BIO-MONITEUR : <span class="${t>=50?"warn":""}">${t>=50?"Stress élevé":"Normal"} — Pouls : ${bpm} BPM</span></div>
+  <h4>SÉCURITÉ &amp; GLACE</h4>
+  <div>NIVEAU D'ALERTE : <b>${esc(al)}</b> · COMPTEUR : ${t} / 100 (verrouillage à 100)</div>
+  <div>├ GLACE BLANCHE :: Sonde v1.2 ......... <span class="${t>=25?"warn":""}">${t>=25?"ACTIVE — scan":"ACTIVE — en attente"}</span></div>
+  <div>└ GLACE NOIRE :: Psychotrope v4.0 .... <span class="${noire?"bad":""}">${noire?"ACTIVE":"INACTIVE — verrouillée"}</span></div>
+  <h4>PROGRAMMES (touchez pour charger / décharger)</h4>`+
+  D.programs.map(p=>{const on=deckState.on.includes(p.n);return `<button class="pg ${on?"on":""}" data-p="${esc(p.n)}">${on?"■":"□"} ${esc(p.n)} <small>${p.mp} MP · ${esc(p.note)}</small></button>`}).join("");
+  el.querySelectorAll(".pg").forEach(b=>b.onclick=()=>{
+    const p=D.programs.find(x=>x.n===b.dataset.p),on=deckState.on.includes(p.n);
+    if(on)deckState.on=deckState.on.filter(x=>x!==p.n);
+    else{const u=D.programs.filter(q=>deckState.on.includes(q.n)).reduce((a,q)=>a+q.mp,0);
+      if(u+p.mp>D.ram){sfxKo();toast("MÉMOIRE SATURÉE — déchargez un programme");return}
+      deckState.on.push(p.n)}
+    sfxClick();renderDeck();
+  });
+}
+document.getElementById("deckBtn").onclick=()=>{sfxClick();deckState.open=!deckState.open;document.getElementById("deck").classList.toggle("open",deckState.open);renderDeck()};
 let viewMode="list";
 function setView(v){
   viewMode=v;
@@ -802,9 +857,21 @@ document.getElementById("startBtn").onclick=()=>{
   started=true;document.getElementById("start").style.display="none";
   startAudio();if(CONFIG.startSound==="modem")sfxModem();handleHash();
 };
-document.getElementById("jackOut").onclick=()=>{
-  sfxJackOut();started=false;document.getElementById("start").style.display="flex";
+function doJackOut(){
+  if(!started)return;
+  if(CONFIG.deck&&emergency()){  /* éjection sous GLACE noire : dumpshock */
+    sfxJackOut();sfxGlitch();document.getElementById("dump").classList.add("show");return;
+  }
+  sfxJackOut();document.body.classList.add("crtoff");
+  setTimeout(()=>{document.body.classList.remove("crtoff");started=false;document.getElementById("start").style.display="flex"},560);
+}
+document.getElementById("jackOut").onclick=doJackOut;
+document.getElementById("dumpOk").onclick=()=>{
+  document.getElementById("dump").classList.remove("show");state.trace=0;state.locked=false;
+  document.getElementById("lockdown").classList.remove("show");updateGauges();
+  started=false;document.getElementById("start").style.display="flex";
 };
+document.addEventListener("keydown",e=>{if(CONFIG.jackOut&&e.shiftKey&&e.key==="Escape")doJackOut()});
 window.addEventListener("hashchange",()=>{if(started)handleHash()});
 const sndBtn=document.getElementById("snd");
 sndBtn.onclick=()=>{setMuted(!muted);sndBtn.textContent=muted?"♪ OFF":"♪ ON"};
