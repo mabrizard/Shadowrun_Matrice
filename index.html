@@ -192,6 +192,10 @@ body.deep::after{animation:flick 2.2s infinite}
 .topo-svg .lk{fill:none;stroke:var(--line);stroke-width:1.2}
 .topo-svg text{font:9px "Courier New",monospace;text-anchor:middle;fill:var(--cyan);pointer-events:none}
 .topo-svg text.dim{fill:var(--dim)}
+.lvl.arch{color:#ffb000;border-color:#ffb000}.chip.on{background:var(--cyan);color:var(--bg)}.archbar{color:#ffb000}
+/* page claire (façade) : pas de lignes de balayage, elles gênent la lecture */
+body.pagelit::after{background:none;animation:none}
+#viewer.look-facade{text-shadow:none}
 </style>
 </head>
 <body>
@@ -401,6 +405,7 @@ function sfxSiren(){
 }
 const sfxOk=()=>{beep(520,.12,"sine",.08);beep(780,.12,"sine",.08,.12);beep(1040,.25,"sine",.08,.24)};
 const sfxKo=()=>{beep(180,.25,"sawtooth",.08);beep(140,.25,"sawtooth",.08,.28);beep(180,.25,"sawtooth",.08,.56)};
+const lvlLabel=f=>f.archive?"ARCHIVE "+f.archive:LEVEL_NAMES[f.level];
 const sfxClick=()=>beep(900,.04,"square",.03);
 /* Connexion par modem (époque câblée) : numérotation, tonalité, bruit de négociation */
 function sfxModem(){
@@ -489,7 +494,7 @@ const pad=document.getElementById("pad");
 codeIn.setAttribute("inputmode","none");
 function openModal(file){
   state.pending=file;mbox.classList.remove("ok");msg.textContent="";msg.style.color="";
-  document.getElementById("mtarget").textContent=`${file.dir}/${file.name} — ${LEVEL_NAMES[file.level]}`;
+  document.getElementById("mtarget").textContent=`${file.dir}/${file.name} — ${lvlLabel(file)}`;
   codeIn.value="";modal.classList.add("show");setTimeout(()=>codeIn.focus(),50);
 }
 function closeModal(){modal.classList.remove("show");state.pending=null}
@@ -563,14 +568,15 @@ document.getElementById("topo").addEventListener("click",e=>{
   const f=FILES.find(x=>x.id===el.dataset.id);if(!f)return;
   sfxClick();state.unlocked[f.level]?showFile(f):openModal(f);
 });
+let onlyArch=false;
 function renderList(){
   const q=searchEl.value;listEl.innerHTML="";
-  const res=FILES.filter(f=>matches(f,q));
+  const res=FILES.filter(f=>matches(f,q)&&(!onlyArch||f.archive));
   if(!res.length){listEl.innerHTML='<div class="empty" style="margin-top:20px">// AUCUN RÉSULTAT //</div>';return}
   res.forEach(f=>{
     const unl=!!state.unlocked[f.level];
     const d=document.createElement("div");d.className="card"+(state.selected===f.id?" sel":"");
-    d.innerHTML=`<span class="lvl l${f.level}">${unl?"":"🔒 "}${LEVEL_NAMES[f.level]}</span><div class="path">${f.dir}/</div><h3>${esc(f.title)}</h3><p>${esc(f.summary)}</p>`;
+    d.innerHTML=`<span class="lvl ${f.archive?"arch":"l"+f.level}">${unl?"":"🔒 "}${lvlLabel(f)}</span><div class="path">${f.dir}/</div><h3>${esc(f.title)}</h3><p>${esc(f.summary)}</p>`;
     d.onclick=()=>{sfxClick();unl?showFile(f):openModal(f)};
     listEl.appendChild(d);
   });
@@ -580,9 +586,11 @@ function showFile(f){
   state.selected=f.id;renderList();
   document.getElementById("ar").classList.add("reading");
   viewer.className=f.look?"look-"+f.look:"";
+  document.body.classList.toggle("pagelit",f.look==="facade");
   viewer.innerHTML=`<button class="backbtn" onclick="backToList()">◂ RETOUR</button>`+
     (f.look&&CONFIG.looks&&CONFIG.looks[f.look]?`<div class="lookbar">${esc(CONFIG.looks[f.look])}</div>`:"")+
-    `<h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${LEVEL_NAMES[f.level]} · HOST ${CONFIG.hostId}</div>`+
+    `<h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${lvlLabel(f)} · HOST ${CONFIG.hostId}</div>`+
+    (f.archive?`<div class="lookbar archbar">ARCHIVE ${f.archive} — DOCUMENT HISTORIQUE REPRIS DE LA CAMPAGNE PRÉCÉDENTE</div>`:"")+
     (f.level>=CONFIG.stampFrom?`<div class="stamp">${esc(CONFIG.stampText)}</div>`:'')+
     [].concat(f.img||[]).map(k=>`<img class="illus" src="${imgSrc(k)}" alt="${k}" onerror="this.onerror=null;this.src=placeholder('${k}')" style="clear:right">`).join("")+toHTML(f.text);
   viewer.scrollTop=0;
@@ -593,6 +601,12 @@ CONFIG.searchChips.forEach(k=>{
   const b=document.createElement("button");b.className="chip";b.textContent=k;
   b.onclick=()=>{searchEl.value=k;renderList()};chips.appendChild(b);
 });
+
+/* Filtre « Historique » : n'apparaît que si la campagne reprend des archives d'autres années */
+if(FILES.some(f=>f.archive)){
+  const b=document.createElement("button");b.className="chip";b.textContent="⌛ HISTORIQUE";
+  b.onclick=()=>{onlyArch=!onlyArch;b.classList.toggle("on",onlyArch);renderList()};chips.appendChild(b);
+}
 
 /* ---------- Tabs ---------- */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
@@ -649,7 +663,7 @@ function run(line){
       }else{
         const fs=FILES.filter(f=>f.dir===d);
         if(!fs.length){print(`ls: ${d}: dossier introuvable`,"err");break}
-        fs.forEach(f=>print(`${state.unlocked[f.level]?"-rw-":"-LOCK"}  ${LEVEL_NAMES[f.level].padEnd(14)} ${f.name}`));
+        fs.forEach(f=>print(`${state.unlocked[f.level]?"-rw-":"-LOCK"}  ${lvlLabel(f).padEnd(14)} ${f.name}`));
       }
       break;}
     case "cd":
@@ -677,7 +691,7 @@ function run(line){
       if(!arg){print("Usage : search <mot-clé>","warn");break}
       const r=FILES.filter(f=>matches(f,arg));
       if(!r.length)print("Aucun résultat.","warn");
-      r.forEach(f=>print(`${f.dir}/${f.name}  [${LEVEL_NAMES[f.level]}${state.unlocked[f.level]?"":" · VERROUILLÉ"}]`));break;}
+      r.forEach(f=>print(`${f.dir}/${f.name}  [${lvlLabel(f)}${state.unlocked[f.level]?"":" · VERROUILLÉ"}]`));break;}
     default:print(`${cmd}: commande inconnue. Tapez 'help'.`,"err");
   }
 }
@@ -752,7 +766,7 @@ lb.addEventListener("pointerup",lbUp);lb.addEventListener("pointercancel",lbUp);
 lbImg.addEventListener("dragstart",e=>e.preventDefault());
 
 /* ---------- Init ---------- */
-function backToList(){document.getElementById("ar").classList.remove("reading")}
+function backToList(){document.getElementById("ar").classList.remove("reading");document.body.classList.remove("pagelit")}
 /* Liens directs pour QR codes : index.html#f=marshall (ids : geo, news, meteo, marshall, janus, ghost) */
 function toast(t){
   let e=document.getElementById("toast");
@@ -767,7 +781,7 @@ function resetAll(){
   state.unlocked={0:true};state.trace=0;state.locked=false;state.selected=null;state.pending=null;
   document.getElementById("lockdown").classList.remove("show");closeModal();
   document.getElementById("ar").classList.remove("reading");
-  viewer.className="";
+  viewer.className="";document.body.classList.remove("pagelit");
   viewer.innerHTML='<div class="empty">// AUCUN FICHIER SÉLECTIONNÉ //<br><br>Sélectionnez un fichier dans l\'arborescence.</div>';
   updateGauges();renderList();
 }
