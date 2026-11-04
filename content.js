@@ -276,3 +276,60 @@ const CATS=[
 
 /* Dossiers du terminal */
 const DIRS=["/root/PROJECT_BOREALIS","/logs/medical","/classified/JANUS","/classified/GHOST"];
+
+/* ---- Archives reprises d'époques antérieures (générées par build.py) ---- */
+FILES.push(...[
+ {
+  "id": "a2054_journal",
+  "dir": "/archives/2054",
+  "name": "journal_interne_benevole.txt",
+  "level": 0,
+  "title": "Journal d'Elena_M — bénévole santé",
+  "kw": [
+   "elena",
+   "journal",
+   "gabriel",
+   "darryl",
+   "ruche"
+  ],
+  "summary": "Fichier personnel d'une bénévole qui commence à comprendre.",
+  "text": "## FICHIER PERSONNEL — NE PAS COPIER\nPropriétaire : Elena_M@UB-Net-Tacoma (bénévole santé) · Dernière modification : 28 octobre 2054\n\n## 3 octobre\nUne autre bonne journée au chapitre. Plus de 400 repas chauds ce soir. Le Frère Gabriel est incroyable, son calme inspire tout le monde. Les gens arrivent cassés par la rue, et en quelques jours ici, ils retrouvent le sourire.\n\n## 19 octobre\nJe ne trouve plus Darryl, le jeune homme de Puyallup que j'aidais à soigner. Le Frère Gabriel dit qu'il a été transféré dans notre clinique centrale de Boston... Mais ses affaires sont encore dans son casier. Même son blouson de cuir auquel il tenait tant.\n\n## 26 octobre\nIl se passe des choses anormales la nuit. Je suis restée tard pour classer des dossiers médicaux. Des bruits venant du monte-charge du sous-sol : un grattement métallique rythmé, comme des pattes ou des mandibules contre le béton. Et cette odeur d'insecticide et de phéromones sucrées qui prend à la gorge.\n\n## 28 octobre\nJ'ai croisé le Frère Gabriel ce matin. Je lui ai parlé de Darryl. Il n'a PAS CLIGNÉ DES YEUX UNE SEULE FOIS en trois minutes. Ses pupilles étaient d'un noir fixe, presque vitreux. Voix monotone : « Ne te tracasse pas, Elena. Nous trouverons bientôt une place pour toi dans la Ruche. »\n\nJe range mes affaires ce soir. Je ne reviens plus jamais ici.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_news",
+  "dir": "/archives/2054",
+  "name": "fil_actu_seattle_2054.txt",
+  "level": 0,
+  "title": "Fil d'actualité — Seattle 2054",
+  "kw": [
+   "actualite",
+   "seattle",
+   "lone star",
+   "barrens",
+   "tacoma",
+   "news"
+  ],
+  "summary": "Les grandes nouvelles de Seattle, de juillet à fin octobre 2054.",
+  "text": "## RTG Seattle — Fil d'actualité public\nDernière mise à jour : 28 octobre 2054\n\n## 28 octobre\n- Lone Star annonce un renfort de patrouilles dans les Puyallup Barrens après plusieurs plaintes de disparitions. Le porte-parole parle de « départs volontaires ».\n- Tacoma : la Confrérie Universelle sert son 20 000e repas de l'année. Le maire salue « une main tendue aux oubliés ».\n\n## 19 octobre\n- Pluies acides de catégorie 3 sur le Sound : écoles fermées dans le Redmond ouest.\n- Grève surprise des livreurs de nutrisoja à Everett. Les rayons des supermarchés se vident.\n\n## 14 octobre\n- Les clinics de rue de Tacoma signalent une hausse des cas de malnutrition chez les SINless.\n- Un decker indépendant interpellé après une intrusion dans un nœud municipal. Il serait en détention à Lone Star HQ.\n\n## 2 octobre\n- Les Orks de l'Underground manifestent contre la fermeture de trois soupes populaires. Aucun blessé.\n- Un convoi corporatiste est attaqué sur l'I-5 : pertes importantes, aucun suspect.\n\n## Septembre\n- Premier pic de pollution de la saison. Alerte respiratoire à Seattle et Tacoma.\n- Ouverture du nouveau chapitre de la Confrérie Universelle à Tacoma.\n\n## Juillet-août\n- Vague de chaleur record. Coupures d'électricité dans les Barrens.\n- Un convoi de ravitaillement de Puyallup disparaît sans laisser de trace.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_meteo",
+  "dir": "/archives/2054",
+  "name": "releves_meteo_seattle_2054.txt",
+  "level": 0,
+  "title": "Relevés météo — Seattle, octobre 2054",
+  "kw": [
+   "meteo",
+   "pluie",
+   "acide",
+   "brouillard",
+   "temperature"
+  ],
+  "summary": "Relevés du bulletin RTG pour octobre 2054.",
+  "text": "## RTG Seattle — Bulletin météo\nZone : Seattle / Tacoma / Puyallup\n\n## Semaine du 1er au 7 octobre\n- Température : 11-15 °C · Pluie fine, brouillard matinal sur le Sound\n- Indice de pollution : modéré\n\n## Semaine du 8 au 14 octobre\n- Température : 9-13 °C · Averses régulières\n- Indice de pollution : élevé · Pluie acide faible le 14, soirée\n\n## Semaine du 15 au 21 octobre\n- Température : 8-12 °C · Pluies acides de catégorie 3 le 19\n- Fermeture des écoles à Redmond ouest\n\n## Semaine du 22 au 28 octobre\n- Température : 6-10 °C · Brouillard épais la nuit du 26 sur Tacoma\n- Visibilité réduite à 40 m dans les Barrens\n\n## Prévision\nRefroidissement, pluie persistante. Premières gelées possibles dans les Barrens après le 5 novembre.",
+  "archive": 2054
+ }
+]);
+DIRS.push(...["/archives/2054"]);
