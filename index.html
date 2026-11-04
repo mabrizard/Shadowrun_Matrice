@@ -293,7 +293,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
   <p style="color:var(--dim);font-size:11px">Activez le son pour une immersion complète</p>
 </div>
 
-<script src="content.js?v=15214114"></script>
+<script src="content.js?v=bfad6d24"></script>
 <script>
 /* Moteur générique : tout le contenu de campagne vient de content.js (CONFIG, IMAGES, CODES, FILES, THREADS…) */
 /* ---------- JackPoint / Shadowtalk (fluff public) ---------- */
@@ -484,7 +484,9 @@ function flash(cls){document.body.classList.remove("flashG","flashR");void docum
 function tryCode(raw){
   const c=(raw||"").trim().toUpperCase();
   const lvl=Object.keys(CODES).find(k=>CODES[k]===c);
-  if(lvl){
+  /* un code ne marche que si le palier précédent est ouvert (sinon il est traité comme un mauvais code) */
+  const reach=lvl&&(CONFIG.hideLocked===false||(()=>{const i=SORTED_LVS.indexOf(+lvl);return i<=0||!!state.unlocked[SORTED_LVS[i-1]]})());
+  if(reach){
     const was=!!state.unlocked[lvl];
     state.unlocked[lvl]=true;save();updateGauges();sfxOk();flash("flashG");
     if(CONFIG.deepLevel&&+lvl===CONFIG.deepLevel&&!was){
