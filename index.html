@@ -211,6 +211,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
 #dump{display:none;position:fixed;inset:0;z-index:99;background:rgba(120,0,0,.88);color:#fff;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;gap:14px}
 #dump.show{display:flex}#dump h1{letter-spacing:4px;font-size:34px;margin:0}
 #dump button{background:transparent;border:1px solid #fff;color:#fff;padding:10px 20px;font:inherit;letter-spacing:2px;cursor:pointer}
+.grp{display:flex;justify-content:space-between;width:100%;background:transparent;border:1px solid var(--line);border-left:3px solid var(--cyan);color:var(--cyan);padding:9px 10px;margin:8px 0 4px;font:inherit;letter-spacing:1px;cursor:pointer;text-align:left}.grp small{color:var(--dim)}.grp.open{background:rgba(0,229,255,.06)}
 </style>
 </head>
 <body>
@@ -623,18 +624,35 @@ document.getElementById("topo").addEventListener("click",e=>{
   const f=FILES.find(x=>x.id===el.dataset.id);if(!f)return;
   sfxClick();state.unlocked[f.level]?showFile(f):openModal(f);
 });
-let onlyArch=false;
+let onlyArch=false;const groupOpen={};
 function renderList(){
   const q=searchEl.value;listEl.innerHTML="";
   const res=FILES.filter(f=>matches(f,q)&&(!onlyArch||f.archive));
   if(!res.length){listEl.innerHTML='<div class="empty" style="margin-top:20px">// AUCUN RÉSULTAT //</div>';return}
-  res.forEach(f=>{
+  const mk=f=>{
     const unl=!!state.unlocked[f.level];
     const d=document.createElement("div");d.className="card"+(state.selected===f.id?" sel":"");
     d.innerHTML=`<span class="lvl ${f.archive?"arch":"l"+f.level}">${unl?"":"🔒 "}${lvlLabel(f)}</span><div class="path">${f.dir}/</div><h3>${esc(f.title)}</h3><p>${esc(f.summary)}</p>`;
     d.onclick=()=>{sfxClick();unl?showFile(f):openModal(f)};
-    listEl.appendChild(d);
-  });
+    return d;
+  };
+  /* Sans archives : liste simple. Avec archives : sous-dossiers par année, l'année en cours ouverte par défaut. */
+  if(!FILES.some(f=>f.archive)){res.forEach(f=>listEl.appendChild(mk(f)));}
+  else{
+    const yrs=[...new Set(res.map(f=>f.archive||CONFIG.era))].sort((a,b)=>b-a);
+    const sel=FILES.find(f=>f.id===state.selected);
+    yrs.forEach(y=>{
+      const items=res.filter(f=>(f.archive||CONFIG.era)===y),cur=y===CONFIG.era;
+      const open=q.trim()!==""||onlyArch||groupOpen[y]===undefined?(cur||q.trim()!==""||onlyArch):groupOpen[y];
+      const forced=sel&&(sel.archive||CONFIG.era)===y;
+      const isOpen=forced||open;
+      const h=document.createElement("button");h.className="grp"+(isOpen?" open":"");
+      h.innerHTML=`<span>${isOpen?"▾":"▸"} ${cur?y+" — EN COURS":"ARCHIVES "+y}</span><small>${items.length}</small>`;
+      h.onclick=()=>{sfxClick();groupOpen[y]=!isOpen;renderList()};
+      listEl.appendChild(h);
+      if(isOpen)items.forEach(f=>listEl.appendChild(mk(f)));
+    });
+  }
   if(viewMode==="topo")renderTopo();
 }
 function showFile(f){
