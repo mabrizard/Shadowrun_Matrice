@@ -280,23 +280,6 @@ const DIRS=["/root/PROJECT_BOREALIS","/logs/medical","/classified/JANUS","/class
 /* ---- Archives reprises d'époques antérieures (générées par build.py) ---- */
 FILES.push(...[
  {
-  "id": "a2054_journal",
-  "dir": "/archives/2054",
-  "name": "journal_interne_benevole.txt",
-  "level": 0,
-  "title": "Journal d'Elena_M — bénévole santé",
-  "kw": [
-   "elena",
-   "journal",
-   "gabriel",
-   "darryl",
-   "ruche"
-  ],
-  "summary": "Fichier personnel d'une bénévole qui commence à comprendre.",
-  "text": "## FICHIER PERSONNEL — NE PAS COPIER\nPropriétaire : Elena_M@UB-Net-Tacoma (bénévole santé) · Dernière modification : 28 octobre 2054\n\n## 3 octobre\nUne autre bonne journée au chapitre. Plus de 400 repas chauds ce soir. Le Frère Gabriel est incroyable, son calme inspire tout le monde. Les gens arrivent cassés par la rue, et en quelques jours ici, ils retrouvent le sourire.\n\n## 19 octobre\nJe ne trouve plus Darryl, le jeune homme de Puyallup que j'aidais à soigner. Le Frère Gabriel dit qu'il a été transféré dans notre clinique centrale de Boston... Mais ses affaires sont encore dans son casier. Même son blouson de cuir auquel il tenait tant.\n\n## 26 octobre\nIl se passe des choses anormales la nuit. Je suis restée tard pour classer des dossiers médicaux. Des bruits venant du monte-charge du sous-sol : un grattement métallique rythmé, comme des pattes ou des mandibules contre le béton. Et cette odeur d'insecticide et de phéromones sucrées qui prend à la gorge.\n\n## 28 octobre\nJ'ai croisé le Frère Gabriel ce matin. Je lui ai parlé de Darryl. Il n'a PAS CLIGNÉ DES YEUX UNE SEULE FOIS en trois minutes. Ses pupilles étaient d'un noir fixe, presque vitreux. Voix monotone : « Ne te tracasse pas, Elena. Nous trouverons bientôt une place pour toi dans la Ruche. »\n\nJe range mes affaires ce soir. Je ne reviens plus jamais ici.",
-  "archive": 2054
- },
- {
   "id": "a2054_news",
   "dir": "/archives/2054",
   "name": "fil_actu_seattle_2054.txt",
@@ -329,6 +312,101 @@ FILES.push(...[
   ],
   "summary": "Relevés en temps réel : pluie acide, AQI 285, prévisions par districts.",
   "text": "## Météo-Net Seattle // Relevés en temps réel — octobre 2054\n\n## Conditions générales\n- Ciel : couverture nuageuse dense, cendres de combustion et smog ambiant\n- Précipitations : pluie acide intermittente (pH 3,8)\n- Température moyenne : 12 °C à 15 °C\n- Risque sanitaire : hypothermie rapide en cas de vêtements humides prolongés\n\n## Indices environnementaux\n- Indice de pollution de l'air (AQI) : 285 / 500 — alerte élevée\n- Recommandation : respirateur ou masque filtrant conseillé hors des dômes corporatifs\n- Rayonnement UV-A : modéré (atténué par les nuages et la pollution)\n\n## Prévisions par districts\n- Downtown / Renton : bruine acide légère, systèmes de neutralisation chimique actifs\n- Redmond / Puyallup : averses acides corrosives, accumulation de boues toxiques\n- Puget Sound / front de mer : vents froids du Pacifique, brume épaisse, humidité 98 %",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_global",
+  "dir": "/archives/2054",
+  "name": "depeches_politiques_2054.txt",
+  "level": 0,
+  "title": "RTG-Global — Politique & diplomatie (2054)",
+  "kw": [
+   "ucas",
+   "elections",
+   "tir tairngire",
+   "denver",
+   "aztlan",
+   "ghostwalker",
+   "foret-noire",
+   "politique"
+  ],
+  "summary": "Dépêches politiques : UCAS, Tír Tairngire, Denver, Europe.",
+  "text": "## RTG-Global // Dépêches politiques & diplomatie — 2054\n\n## 8 novembre — UCAS / élections anticipées\nTensions à Washington D.C. : la crise économique et le débat sur le statut des SINless pèsent sur l'administration UCAS. Les instituts de sondage prévoient une campagne électorale particulièrement agitée pour la présidence.\n\n## 22 septembre — Tír Tairngire / isolationnisme\nLe Conseil des Princes du Tír Tairngire (la nation elfique au sud de Seattle) renforce les patrouilles magiques et le confinement à sa frontière. Les autorités dénoncent la hausse du trafic de puces BTL et du braconnage de réactifs.\n\n## 11 août — Denver / conflit de territoire\nAztlan et la Cour corporatiste s'affrontent indirectement dans la ville divisée de Denver. Le Grand Dragon Ghostwalker maintient une neutralité armée, mais la sécurité des secteurs ex-américains a été doublée.\n\n## 15 mai — EAA / république troll de la Forêt-Noire\nEn Europe, la république troll de la Forêt-Noire intensifie ses échanges diplomatiques avec le duché de Pomorya. Des milices orks réclament une représentation politique accrue dans les montagnes du Sud.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_matrixtech",
+  "dir": "/archives/2054",
+  "name": "matrix_tech_news_2054.txt",
+  "level": 0,
+  "title": "Matrix-Tech News — Composants & cybernétique",
+  "kw": [
+   "fuchi",
+   "cyber-5",
+   "renraku",
+   "arcologie",
+   "ares",
+   "btl",
+   "yamatetsu",
+   "cyberdeck"
+  ],
+  "summary": "Guerre des composants : Fuchi, Renraku, Ares, alerte BTL.",
+  "text": "## Matrix-Tech News // Guerre des composants & cybernétique\n\n## 19 octobre — Fuchi Industrial / leader du decking\nFuchi annonce la sortie prochaine du cyberdeck « Fuchi Cyber-5 », promettant une mémoire vive augmentée à 12 MP et une architecture de processeur optimisée contre la GLACE noire. La valeur boursière de Fuchi s'envole.\n\n## 3 septembre — Renraku Arcology / inauguration prochaine (2055)\nLe chantier géant de l'Arcologie Renraku de Seattle touche à sa fin. Ce complexe autonome de 300 étages est présenté comme le joyau technologique du XXIe siècle, prévu pour accueillir plus de 90 000 résidents corporatistes dès début 2055.\n\n## 14 juin — Ares Macrotechnology / défense & armement\nAres dévoile sa nouvelle gamme de puces réflexes câblées et d'armures de sécurité tactiques. Des contrats d'équipement exclusifs ont été signés avec plusieurs polices privées nord-américaines.\n\n## 2 avril — BTL & bioware / alerte sanitaire\nLa corporation Yamatetsu met en garde contre la circulation de puces « Better-Than-Life » (BTL) de contrebande survoltées au fil de carbone, provoquant des grilles synaptiques fatales.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_tridpop",
+  "dir": "/archives/2054",
+  "name": "trideo_pop_medias_2054.txt",
+  "level": 0,
+  "title": "Tridéo-Pop — Spectacles, célébrités & Wyrm Talk",
+  "kw": [
+   "dunkelzahn",
+   "wyrm talk",
+   "simsense",
+   "horizon",
+   "urban brawl",
+   "media"
+  ],
+  "summary": "Médias, simsense, célébrités et culte du dragon.",
+  "text": "## Tridéo-Pop // Spectacles, célébrités & culte du dragon\n\n## 30 octobre — Média / Wyrm Talk en direct\nLe Grand Dragon Dunkelzahn bat des records d'audience mondiaux lors du dernier épisode de son émission Wyrm Talk. Interrogé sur la politique humaine, le dragon est resté énigmatique : « La métahumanité prépare son avenir, mais ignore encore la nature des tempêtes à venir. »\n\n## 12 août — Simsense / sensation du box-office\nLe dernier film en simsense immersif d'Horizon enregistre plus de 50 millions de téléchargements sur la Matrice en 48 heures. Le retour haptique haute définition s'impose comme le nouveau standard.\n\n## 21 mai — Sport / Urban Brawl\nLe championnat mondial d'Urban Brawl s'ouvre à Néo-Tokyo sous de fortes tensions. Les équipes corporatistes rivales promettent un niveau de violence inédit pour cette saison 2054-2055.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_shadowland",
+  "dir": "/archives/2054",
+  "name": "shadowland_bbs_2054.txt",
+  "level": 0,
+  "title": "Shadowland BBS — Fil clandestin (2054)",
+  "kw": [
+   "shadowland",
+   "fastjack",
+   "captain lazer",
+   "grrl",
+   "firewatch",
+   "orichalque",
+   "vans noirs",
+   "sinless"
+  ],
+  "summary": "Rumeurs des ombres : Firewatch, vans noirs, orichalque.",
+  "text": "## Shadowland BBS // Fil clandestin — accès décrypté (2054)\n\n## Fastjack\nDes mouvements de fonds anormaux ont été détectés entre Detroit et Chicago. Ares semble rapatrier ses équipes d'extraction d'élite « Firewatch ». Quelqu'un sait ce qu'ils ont trouvé dans l'Illinois ?\n\n## Captain Lazer\nSi vous runnez à Tacoma ou Redmond, évitez les patrouilles non identifiées. Des vans noirs sans logo embarquent des SINless en pleine nuit. Ce ne sont pas des flics de Lone Star, leurs armes n'ont pas de marquage.\n\n## /dev/grrl\nLa rumeur dit qu'un gros lot d'orichalque brut a été sorti clandestinement du Tír Tairngire. Les chasseurs de talismans sont sur les dents.",
+  "archive": 2054
+ },
+ {
+  "id": "a2054_journal",
+  "dir": "/archives/2054",
+  "name": "journal_interne_benevole.txt",
+  "level": 0,
+  "title": "Journal d'Elena_M — bénévole santé",
+  "kw": [
+   "elena",
+   "journal",
+   "gabriel",
+   "darryl",
+   "ruche"
+  ],
+  "summary": "Fichier personnel d'une bénévole qui commence à comprendre.",
+  "text": "## FICHIER PERSONNEL — NE PAS COPIER\nPropriétaire : Elena_M@UB-Net-Tacoma (bénévole santé) · Dernière modification : 28 octobre 2054\n\n## 3 octobre\nUne autre bonne journée au chapitre. Plus de 400 repas chauds ce soir. Le Frère Gabriel est incroyable, son calme inspire tout le monde. Les gens arrivent cassés par la rue, et en quelques jours ici, ils retrouvent le sourire.\n\n## 19 octobre\nJe ne trouve plus Darryl, le jeune homme de Puyallup que j'aidais à soigner. Le Frère Gabriel dit qu'il a été transféré dans notre clinique centrale de Boston... Mais ses affaires sont encore dans son casier. Même son blouson de cuir auquel il tenait tant.\n\n## 26 octobre\nIl se passe des choses anormales la nuit. Je suis restée tard pour classer des dossiers médicaux. Des bruits venant du monte-charge du sous-sol : un grattement métallique rythmé, comme des pattes ou des mandibules contre le béton. Et cette odeur d'insecticide et de phéromones sucrées qui prend à la gorge.\n\n## 28 octobre\nJ'ai croisé le Frère Gabriel ce matin. Je lui ai parlé de Darryl. Il n'a PAS CLIGNÉ DES YEUX UNE SEULE FOIS en trois minutes. Ses pupilles étaient d'un noir fixe, presque vitreux. Voix monotone : « Ne te tracasse pas, Elena. Nous trouverons bientôt une place pour toi dans la Ruche. »\n\nJe range mes affaires ce soir. Je ne reviens plus jamais ici.",
   "archive": 2054
  }
 ]);
