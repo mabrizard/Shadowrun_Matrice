@@ -159,6 +159,15 @@ La Reine ne pond plus des soldats. Elle pond des récepteurs. Ce n'est plus notr
 ## NOTE PERSONNELLE
 « Elles veulent que je déverrouille le secteur -3. Elles sont patientes. La Haine est pure. Je ne suis pas malade. Je ne suis pas malade. Je ne suis pas ma »
 [ENREGISTREMENT INTERROMPU — SAISIE MANUELLE DÉTECTÉE SUR LE CODE D'AUTORISATION DU SECTEUR -3]`},
+ {id:"vlog", dir:"/logs/medical", name:"journal_video_0319.vid", level:4,
+  title:"Journal vidéo — Dr Nuri Marshall · 19 mars 2078", kw:["marshall","nuri","video","vidéo","journal","enregistrement","cuves","reine","antenne","voix","pilier","secteur -3","sas"],
+  summary:"Dernier enregistrement de la caméra MED-03, Secteur -3. Flux vidéo dégradé.",
+  video:"journal_video_0319.mp4",
+  text:`## ENREGISTREMENT CAM MED-03 — SECTEUR -3
+2078-03-19 · 03:07 · Durée : 00:33 · Flux vidéo dégradé, piste audio récupérée
+## TRANSCRIPTION AUTOMATIQUE
+« Journal du docteur Marshall, 19 mars. Je croyais fabriquer une armée obéissante. Je me trompais. Depuis que la foreuse a touché le Pilier, les cuves ne nous répondent plus. La Reine ne pond pas des soldats. Elle pond une antenne. Et quelque chose écoute. Douze voix. Elles connaissent mon nom. Si vous trouvez cet enregistrement, ne descendez pas au secteur -3. »
+[ENREGISTREMENT INTERROMPU]`},
  {id:"janus", dir:"/classified/JANUS", name:"projet_janus.txt", level:2,
   title:"PROJET JANUS — Ultra-confidentiel", kw:["janus","orichalque","magie du sang","ruche","drain","quatrieme monde","matrice de sorts"],
   summary:"Le véritable but du forage BOREALIS.",

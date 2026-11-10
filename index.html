@@ -99,6 +99,7 @@ main{flex:1;min-height:0;position:relative}
 #viewer ul{margin:8px 0 8px 22px;line-height:1.6;font-size:14px}
 #viewer .meta{font-size:11px;color:var(--dim);border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:12px}
 #viewer .stamp{display:inline-block;border:2px solid var(--red);color:var(--red);padding:2px 10px;transform:rotate(-3deg);margin:6px 0;letter-spacing:2px;font-weight:bold}
+#viewer video.clip{display:block;width:100%;max-width:420px;max-height:78vh;margin:0 auto 14px;border:1px solid var(--cyan);background:#000;box-shadow:0 0 14px rgba(0,229,255,.3)}
 #viewer img.illus{float:right;width:200px;max-width:40%;margin:0 0 12px 16px;border:1px solid var(--cyan);background:#000;box-shadow:0 0 14px rgba(0,229,255,.3)}
 .empty{color:var(--dim);text-align:center;margin-top:20vh;font-size:14px}
 
@@ -301,7 +302,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
   <p style="color:var(--dim);font-size:11px">Activez le son pour une immersion complète</p>
 </div>
 
-<script src="content.js?v=dc396865"></script>
+<script src="content.js?v=39c76945"></script>
 <script>
 /* Moteur générique : tout le contenu de campagne vient de content.js (CONFIG, IMAGES, CODES, FILES, THREADS…) */
 /* ---------- JackPoint / Shadowtalk (fluff public) ---------- */
@@ -696,6 +697,7 @@ function showFile(f){
     `<h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${lvlLabel(f)} · HOST ${CONFIG.hostId}</div>`+
     (f.archive?`<div class="lookbar archbar">ARCHIVE ${f.archive} — DOCUMENT HISTORIQUE REPRIS DE LA CAMPAGNE PRÉCÉDENTE</div>`:"")+
     (f.level>=CONFIG.stampFrom?`<div class="stamp">${esc(CONFIG.stampText)}</div>`:'')+
+    (f.video?`<video class="clip" src="${esc(f.video)}" controls playsinline preload="metadata"></video>`:"")+
     [].concat(f.img||[]).map(k=>`<img class="illus" src="${imgSrc(k)}" alt="${k}" onerror="this.onerror=null;this.src=placeholder('${k}')" style="clear:right">`).join("")+toHTML(f.text);
   viewer.scrollTop=0;
 }
