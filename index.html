@@ -302,7 +302,7 @@ body.crtoff #app{animation:crtoff .55s ease-in forwards}
   <p style="color:var(--dim);font-size:11px">Activez le son pour une immersion complète</p>
 </div>
 
-<script src="content.js?v=39c76945"></script>
+<script src="content.js?v=2f236752"></script>
 <script>
 /* Moteur générique : tout le contenu de campagne vient de content.js (CONFIG, IMAGES, CODES, FILES, THREADS…) */
 /* ---------- JackPoint / Shadowtalk (fluff public) ---------- */
@@ -697,7 +697,7 @@ function showFile(f){
     `<h2>${esc(f.title)}</h2><div class="meta">${f.dir}/${f.name} · ${lvlLabel(f)} · HOST ${CONFIG.hostId}</div>`+
     (f.archive?`<div class="lookbar archbar">ARCHIVE ${f.archive} — DOCUMENT HISTORIQUE REPRIS DE LA CAMPAGNE PRÉCÉDENTE</div>`:"")+
     (f.level>=CONFIG.stampFrom?`<div class="stamp">${esc(CONFIG.stampText)}</div>`:'')+
-    (f.video?`<video class="clip" src="${esc(f.video)}" controls playsinline preload="metadata"></video>`:"")+
+    (f.video?`<video class="clip" src="${esc(f.video)}" poster="${esc(f.video.replace(/\.mp4$/,".jpg"))}" controls playsinline preload="metadata"></video>`:"")+
     [].concat(f.img||[]).map(k=>`<img class="illus" src="${imgSrc(k)}" alt="${k}" onerror="this.onerror=null;this.src=placeholder('${k}')" style="clear:right">`).join("")+toHTML(f.text);
   viewer.scrollTop=0;
 }

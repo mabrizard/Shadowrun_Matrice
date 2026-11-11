@@ -192,6 +192,7 @@ Toute fuite sera traitée au niveau Corporate. Poursuivre le forage jusqu'à con
   title:"Traceur de transaction financière", kw:["ghost","denver","ghostwalker","salish-shidhe","banque","contrat","paiement"],
   summary:"Origine du paiement du contrat de Shadowrun initial.",
   img:["aurora","givre"],
+  video:"trace_paiement.mp4",
   text:`## TRACEUR DE TRANSACTION — FICHIER OMBRE
 Statut : FUITE / HORS PÉRIMÈTRE AZTECHNOLOGY
 
